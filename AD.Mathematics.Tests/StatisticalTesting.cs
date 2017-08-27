@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AD.IO;
@@ -11,29 +12,9 @@ namespace AD.Mathematics.Tests
 {
     public static class StatisticalTesting
     {
-        [PublicAPI]
-        public class Observation
-        {
-            public string Importer { get; set; }
-
-            public string Exporter { get; set; }
-
-            public int Id { get; set; }
-
-            public string Year { get; set; }
-
-            public double Distance { get; set; }
-
-            public double Trade { get; set; }
-
-            public int CommonBorder { get; set; }
-
-            public int CommonLanguage { get; set; }
-
-            public int ColonialRelationship { get; set; }
-        }
-
-        private static Observation[] GravityCourseData { get; }
+        [NotNull]
+        [ItemNotNull]
+        private static IReadOnlyCollection<Observation> GravityCourseData { get; }
 
         static StatisticalTesting()
         {
@@ -59,11 +40,14 @@ namespace AD.Mathematics.Tests
         }
 
         /// <summary>
-        /// Test that the <see cref="GeneralizedLinearRegressionModel{T}"/> with a <see cref="GaussianDistribution"/> replicates the <see cref="MultipleLinearRegressionModel"/>.
+        /// Test that the <see cref="GeneralizedLinearModel{T}"/> with a <see cref="GaussianDistribution"/> replicates a known regression.
         /// </summary>
         [Fact]
         public static void Test0()
         {
+            const int precision = 8;
+            ArrayEqualityComparer comparer = new ArrayEqualityComparer(precision);
+
             double[][] input =
                 GravityCourseData.Where(x => x.Trade > 0)
                                  .Select(
@@ -80,33 +64,42 @@ namespace AD.Mathematics.Tests
                 GravityCourseData.Where(x => x.Trade > 0)
                                  .Select(x => Math.Log(x.Trade))
                                  .ToArray();
+
+            GeneralizedLinearModel<double> generalized =
+                GeneralizedLinearModel.OlsRegression(input, response);
+
+            const int n = 91_506;
+            const int k = 5;
+            const int df = n - k;
+            const double sse = 1039248.23542009;
+            const double mse = sse / df;
+
+            double[] coefficients = new double[] { 13.420712, -1.241669, 1.553772, -0.3691012, 2.8724586 };
+
+            double[] varianceOLS = new double[] { 0.01178342, 0.00015513, 0.00564040, 0.00119503, 0.00521226 };
+            double[] varianceHC0 = new double[] { 0.01091862, 0.00014569, 0.00437145, 0.00120774, 0.00297996 };
+            double[] varianceHC1 = new double[] { 0.01091922, 0.00014570, 0.00437169, 0.00120781, 0.00298013 };
+
+            double[] standardErrorsOLS = varianceOLS.Select(Math.Sqrt).ToArray();
+            double[] standardErrorsHC0 = varianceHC0.Select(Math.Sqrt).ToArray();
+            double[] standardErrorsHC1 = varianceHC1.Select(Math.Sqrt).ToArray();
             
-            double[] weights =
-                Enumerable.Repeat(1.0, response.Length)
-                          .ToArray();
+            Assert.Equal(n, generalized.ObservationCount);
+            Assert.Equal(k, generalized.VariableCount);
+            Assert.Equal(df, generalized.DegreesOfFreedom);
 
-            MultipleLinearRegressionModel standard =
-                new MultipleLinearRegressionModel(input, response, weights, 1.0);
+            Assert.Equal(mse, generalized.MeanSquaredError, precision);
+            Assert.Equal(sse, generalized.SumSquaredErrors, precision);
 
-            GeneralizedLinearRegressionModel<double> generalized = 
-                new GeneralizedLinearRegressionModel<double>(input, response, weights, new GaussianDistribution(), 1.0);
+            Assert.Equal(coefficients, generalized.Coefficients, comparer);
 
-            Assert.Equal(standard.ObservationCount, generalized.ObservationCount);
-            Assert.Equal(standard.VariableCount, generalized.VariableCount);
-            Assert.Equal(standard.DegreesOfFreedom, generalized.DegreesOfFreedom);
+            Assert.Equal(varianceOLS, generalized.VarianceOLS, comparer);
+            Assert.Equal(varianceHC0, generalized.VarianceHC0, comparer);
+            Assert.Equal(varianceHC1, generalized.VarianceHC1, comparer);
 
-            Assert.Equal(standard.Coefficients, generalized.Coefficients);
-
-            Assert.Equal(standard.MeanSquaredError, generalized.MeanSquaredError);
-            Assert.Equal(standard.SumSquaredErrors, generalized.SumSquaredErrors);
-
-            Assert.Equal(standard.StandardErrors, generalized.StandardErrors);
-            Assert.Equal(standard.StandardErrorsHc0, generalized.StandardErrorsHc0);
-            Assert.Equal(standard.StandardErrorsHc1, generalized.StandardErrorsHc1);
-
-            Assert.Equal(standard.Variance, generalized.Variance);
-            Assert.Equal(standard.VarianceHc0, generalized.VarianceHc0);
-            Assert.Equal(standard.VarianceHc1, generalized.VarianceHc1);
+            Assert.Equal(standardErrorsOLS, generalized.StandardErrorsOLS, comparer);
+            Assert.Equal(standardErrorsHC0, generalized.StandardErrorsHC0, comparer);
+            Assert.Equal(standardErrorsHC1, generalized.StandardErrorsHC1, comparer);
         }
 
         [Fact]
@@ -131,8 +124,8 @@ namespace AD.Mathematics.Tests
                 Enumerable.Repeat(1.0, response.Length)
                           .ToArray();
 
-            GeneralizedLinearRegressionModel<int> generalized =
-                new GeneralizedLinearRegressionModel<int>(input, response, weights, new PoissonDistribution(), 1.0);
+            GeneralizedLinearModel<int> generalized =
+                new GeneralizedLinearModel<int>(input, response, weights, new PoissonDistribution(), 1.0);
 
             Assert.Equal(99981, generalized.ObservationCount);
             Assert.Equal(5, generalized.VariableCount);

@@ -49,37 +49,37 @@ namespace AD.Mathematics.RegressionModels
         /// The standard errors for the model intercept and coefficients ≡ SE = sqrt(σ²) = sqrt(Σ(xᵢ - x̄)²).
         /// </summary>
         [NotNull]
-        IReadOnlyList<double> StandardErrors { get; }
+        IReadOnlyList<double> StandardErrorsOLS { get; }
 
         /// <summary>
         /// HCO (White, 1980): the original White (1980) standard errors ≡ Xᵀ * [eᵢ²] * X.
         /// </summary>
         [NotNull]
-        IReadOnlyList<double> StandardErrorsHc0 { get; }
+        IReadOnlyList<double> StandardErrorsHC0 { get; }
 
         /// <summary>
         /// HC1 (MacKinnon and White, 1985): the common White standard errors, equivalent to the 'robust' option in Stata ≡ Xᵀ * [eᵢ² * n ÷ (n - k)] * X.
         /// </summary>
         [NotNull]
-        IReadOnlyList<double> StandardErrorsHc1 { get; }
+        IReadOnlyList<double> StandardErrorsHC1 { get; }
 
         /// <summary>
         /// The variance for the model ≡ σ² = Σ(xᵢ - x̄)².
         /// </summary>
         [NotNull]
-        IEnumerable<double> Variance { get; }
+        IEnumerable<double> VarianceOLS { get; }
 
         /// <summary>
         /// The variance for the model based on HC0 scaling.
         /// </summary>
         [NotNull]
-        IEnumerable<double> VarianceHc0 { get; }
+        IEnumerable<double> VarianceHC0 { get; }
 
         /// <summary>
         /// The variance for the model based on HC1 scaling.
         /// </summary>
         [NotNull]
-        IEnumerable<double> VarianceHc1 { get; }
+        IEnumerable<double> VarianceHC1 { get; }
 
         /// <summary>
         /// Evaluates the regression for a given response vector.

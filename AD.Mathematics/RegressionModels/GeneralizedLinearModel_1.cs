@@ -13,7 +13,7 @@ namespace AD.Mathematics.RegressionModels
     /// Represents a generalized linear regression model.
     /// </summary>
     [PublicAPI]
-    public class GeneralizedLinearRegressionModel<T> : IRegressionModel
+    public class GeneralizedLinearModel<T> : IRegressionModel
     {
         [NotNull]
         private readonly IDistribution<T> _family;
@@ -66,35 +66,35 @@ namespace AD.Mathematics.RegressionModels
         /// <summary>
         /// The standard errors for the model intercept and coefficients ≡ SE = sqrt(σ²) = sqrt(Σ(xᵢ - x̄)²).
         /// </summary>
-        public IReadOnlyList<double> StandardErrors { get; }
+        public IReadOnlyList<double> StandardErrorsOLS { get; }
 
         /// <summary>
         /// HCO (White, 1980): the original White (1980) standard errors ≡ Xᵀ * [eᵢ²] * X.
         /// </summary>
-        public IReadOnlyList<double> StandardErrorsHc0 { get; }
+        public IReadOnlyList<double> StandardErrorsHC0 { get; }
 
         /// <summary>
         /// HC1 (MacKinnon and White, 1985): the common White standard errors, equivalent to the 'robust' option in Stata ≡ Xᵀ * [eᵢ² * n ÷ (n - k)] * X.
         /// </summary>
-        public IReadOnlyList<double> StandardErrorsHc1 { get; }
+        public IReadOnlyList<double> StandardErrorsHC1 { get; }
 
         /// <summary>
         /// The variance for the model ≡ σ² = Σ(xᵢ - x̄)².
         /// </summary>
-        public IEnumerable<double> Variance => StandardErrors.Select(x => x * x);
+        public IEnumerable<double> VarianceOLS => StandardErrorsOLS.Select(x => x * x);
 
         /// <summary>
         /// The variance for the model based on HC0 scaling.
         /// </summary>
-        public IEnumerable<double> VarianceHc0 => StandardErrorsHc0.Select(x => x * x);
+        public IEnumerable<double> VarianceHC0 => StandardErrorsHC0.Select(x => x * x);
 
         /// <summary>
         /// The variance for the model based on HC1 scaling.
         /// </summary>
-        public IEnumerable<double> VarianceHc1 => StandardErrorsHc1.Select(x => x * x);
+        public IEnumerable<double> VarianceHC1 => StandardErrorsHC1.Select(x => x * x);
 
         /// <summary>
-        /// Constructs a <see cref="MultipleLinearRegressionModel"/> estimated with the given data.
+        /// Constructs a <see cref="GeneralizedLinearModel{T}"/> estimated with the given data.
         /// </summary>
         /// <param name="design">
         /// The design matrix of independent variables.
@@ -108,7 +108,7 @@ namespace AD.Mathematics.RegressionModels
         /// <param name="family">
         /// The distribution class used by the model.
         /// </param>
-        public GeneralizedLinearRegressionModel([NotNull][ItemNotNull] double[][] design, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution<T> family)
+        public GeneralizedLinearModel([NotNull][ItemNotNull] double[][] design, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution<T> family)
         {
             if (design is null)
             {
@@ -138,15 +138,15 @@ namespace AD.Mathematics.RegressionModels
             
             SumSquaredErrors = squaredErrors.Sum();
 
-            StandardErrors = design.StandardError(squaredErrors, HeteroscedasticityConsistent.OLS);
+            StandardErrorsOLS = design.StandardError(squaredErrors, HeteroscedasticityConsistent.OLS);
             
-            StandardErrorsHc0 = design.StandardError(squaredErrors, HeteroscedasticityConsistent.HC0);
+            StandardErrorsHC0 = design.StandardError(squaredErrors, HeteroscedasticityConsistent.HC0);
 
-            StandardErrorsHc1 = design.StandardError(squaredErrors, HeteroscedasticityConsistent.HC1);
+            StandardErrorsHC1 = design.StandardError(squaredErrors, HeteroscedasticityConsistent.HC1);
         }
 
         /// <summary>
-        /// Constructs a <see cref="MultipleLinearRegressionModel"/> estimated with the given data using <see cref="RegressionOls.RegressOls(double[][], double[])"/>.
+        /// Constructs a <see cref="GeneralizedLinearModel{T}"/> estimated with the given data using <see cref="RegressionOls.RegressOls(double[][], double[])"/>.
         /// </summary>
         /// <param name="independent">
         /// A collection of independent value vectors.
@@ -163,7 +163,7 @@ namespace AD.Mathematics.RegressionModels
         /// <param name="constant">
         /// The constant used by the model to prepend the design matrix.
         /// </param>
-        public GeneralizedLinearRegressionModel([NotNull][ItemNotNull] double[][] independent, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution<T> family, double constant)
+        public GeneralizedLinearModel([NotNull][ItemNotNull] double[][] independent, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution<T> family, double constant)
             : this(independent.Prepend(constant), response, weights, family)
         {
         }
@@ -284,7 +284,7 @@ namespace AD.Mathematics.RegressionModels
 
             for (int i = 0; i < Coefficients.Count; i++)
             {
-                stringBuilder.AppendLine($"B[{i}]: {Coefficients[i]} (SE: {StandardErrors[i]}) (HC0: {StandardErrorsHc0[i]}) (HC1: {StandardErrorsHc1[i]})");
+                stringBuilder.AppendLine($"B[{i}]: {Coefficients[i]} (SE: {StandardErrorsOLS[i]}) (HC0: {StandardErrorsHC0[i]}) (HC1: {StandardErrorsHC1[i]})");
             }
 
             return stringBuilder.ToString();

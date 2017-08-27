@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using AD.Mathematics;
 using JetBrains.Annotations;
 
 namespace AD.Mathematics.Matrix
