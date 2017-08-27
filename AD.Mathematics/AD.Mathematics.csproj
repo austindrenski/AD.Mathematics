@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Authors>Austin Drenski</Authors>
+    <Company>Austin Drenski</Company>
+    <Description>C# library for mathematics and statistical analysis based on standard arrays.</Description>
+    <Copyright>Copyright (c) 2017 Austin Drenski</Copyright>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/austindrenski/AD.Mathematics/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/austindrenski/AD.Mathematics</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/austindrenski/AD.Mathematics</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
