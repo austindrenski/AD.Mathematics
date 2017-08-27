@@ -68,11 +68,11 @@ namespace AD.Mathematics.Tests
             GeneralizedLinearModel<double> generalized =
                 GeneralizedLinearModel.OlsRegression(input, response);
 
-            const int n = 91_506;
-            const int k = 5;
-            const int df = n - k;
+            int n = input.Length;
+            int k = input[0].Length + 1;
+            int df = n - k;
             const double sse = 1039248.23542009;
-            const double mse = sse / df;
+            double mse = sse / df;
 
             double[] coefficients = new double[] { 13.420712, -1.241669, 1.553772, -0.3691012, 2.8724586 };
 
