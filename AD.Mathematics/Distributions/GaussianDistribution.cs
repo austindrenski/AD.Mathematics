@@ -146,11 +146,13 @@ namespace AD.Mathematics.Distributions
         {
             if (LinkFunction is IdentityLinkFunction || LinkFunction is PowerLinkFunction power && power.Power is 1.0)
             {
+                double[] fitted = Fit(meanResponse.ToArray());
+
                 double sumSquaredErrors = 0.0;
 
                 for (int i = 0; i < response.Count; i++)
                 {
-                    double error = response[i] - Fit(meanResponse[i]);
+                    double error = response[i] - fitted[i];
 
                     sumSquaredErrors += error * error;
                 }
@@ -215,7 +217,7 @@ namespace AD.Mathematics.Distributions
         /// A linear prediction value.
         /// </returns>
         [Pure]
-        public double Predict(double meanResponse)
+        public double[] Predict(double[] meanResponse)
         {
             return LinkFunction.Evaluate(meanResponse);
         }
@@ -230,7 +232,7 @@ namespace AD.Mathematics.Distributions
         /// A mean response value.
         /// </returns>
         [Pure]
-        public double Fit(double linearPredicton)
+        public double[] Fit(double[] linearPredicton)
         {
             return LinkFunction.Inverse(linearPredicton);
         }
@@ -262,10 +264,9 @@ namespace AD.Mathematics.Distributions
         /// A weight based on the mean response.
         /// </returns>
         [Pure]
-        public double Weight(double meanResponse)
+        public double[] Weight(double[] meanResponse)
         {
-            double derivative = LinkFunction.FirstDerivative(meanResponse);
-            return 1.0 / (derivative * derivative);
+            return LinkFunction.FirstDerivative(meanResponse).Select(x => 1.0 / (x * x)).ToArray();
         }
 
         /// <summary>

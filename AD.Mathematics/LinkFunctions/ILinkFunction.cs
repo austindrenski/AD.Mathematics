@@ -18,7 +18,7 @@ namespace AD.Mathematics.LinkFunctions
         /// The function value at the argument.
         /// </returns>
         [Pure]
-        double Evaluate(double x);
+        double[] Evaluate(double[] x);
 
         /// <summary>
         /// Evaluates the inverse link function given the argument.
@@ -30,7 +30,7 @@ namespace AD.Mathematics.LinkFunctions
         /// The function value at the argument.
         /// </returns>
         [Pure]
-        double Inverse(double x);
+        double[] Inverse(double[] x);
 
         /// <summary>
         /// Evaluates the first derivative of the link function given the argument.
@@ -42,7 +42,7 @@ namespace AD.Mathematics.LinkFunctions
         /// The first derivative value at the argument.
         /// </returns>
         [Pure]
-        double FirstDerivative(double x);
+        double[] FirstDerivative(double[] x);
 
         /// <summary>
         /// Evaluates the second derivative of the link function given the argument.
@@ -54,6 +54,6 @@ namespace AD.Mathematics.LinkFunctions
         /// The second derivative value at the argument.
         /// </returns>
         [Pure]
-        double SecondDerivative(double x);
+        double[] SecondDerivative(double[] x);
     }
 }

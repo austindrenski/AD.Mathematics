@@ -17,7 +17,7 @@ namespace AD.Mathematics.LinkFunctions
         /// <returns>
         /// The function value at the argument.
         /// </returns>
-        public double Evaluate(double x)
+        public double[] Evaluate(double[] x)
         {
             throw new NotImplementedException();
         }
@@ -31,7 +31,7 @@ namespace AD.Mathematics.LinkFunctions
         /// <returns>
         /// The function value at the argument.
         /// </returns>
-        public double Inverse(double x)
+        public double[] Inverse(double[] x)
         {
             throw new NotImplementedException();
         }
@@ -45,7 +45,7 @@ namespace AD.Mathematics.LinkFunctions
         /// <returns>
         /// The first derivative value at the argument.
         /// </returns>
-        public double FirstDerivative(double x)
+        public double[] FirstDerivative(double[] x)
         {
             throw new NotImplementedException();
         }
@@ -59,7 +59,7 @@ namespace AD.Mathematics.LinkFunctions
         /// <returns>
         /// The second derivative value at the argument.
         /// </returns>
-        public double SecondDerivative(double x)
+        public double[] SecondDerivative(double[] x)
         {
             throw new NotImplementedException();
         }

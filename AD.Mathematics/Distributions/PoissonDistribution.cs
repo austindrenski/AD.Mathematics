@@ -173,11 +173,13 @@ namespace AD.Mathematics.Distributions
 
             for (int i = 0; i < divided.Length; i++)
             {
-                divided[i] = response[i] / meanResponse[i];
-
-                if (divided[i] <= 0)
+                if (response[i] <= 0)
                 {
                     divided[i] = double.Epsilon;
+                }
+                else
+                {
+                    divided[i] = response[i] / meanResponse[i];
                 }
             }
 
@@ -218,10 +220,9 @@ namespace AD.Mathematics.Distributions
         /// A weight based on the mean response.
         /// </returns>
         [Pure]
-        public double Weight(double meanResponse)
+        public double[] Weight(double[] meanResponse)
         {
-            double derivative = LinkFunction.FirstDerivative(meanResponse);
-            return 1.0 / (derivative * derivative);
+            return LinkFunction.FirstDerivative(meanResponse).Select(x => 1.0 / (x * x)).ToArray();
         }
 
         /// <summary>
@@ -234,7 +235,7 @@ namespace AD.Mathematics.Distributions
         /// A linear prediction value.
         /// </returns>
         [Pure]
-        public double Predict(double meanResponse)
+        public double[] Predict(double[] meanResponse)
         {
             return LinkFunction.Evaluate(meanResponse);
         }
@@ -249,7 +250,7 @@ namespace AD.Mathematics.Distributions
         /// A mean response value.
         /// </returns>
         [Pure]
-        public double Fit(double linearPredicton)
+        public double[] Fit(double[] linearPredicton)
         {
             return LinkFunction.Inverse(linearPredicton);
         }

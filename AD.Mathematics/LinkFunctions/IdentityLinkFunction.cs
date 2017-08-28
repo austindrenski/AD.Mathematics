@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System.Linq;
+using JetBrains.Annotations;
 
 namespace AD.Mathematics.LinkFunctions
 {
@@ -17,9 +18,9 @@ namespace AD.Mathematics.LinkFunctions
         /// <returns>
         /// The function value at the argument.
         /// </returns>
-        public double Evaluate(double x)
+        public double[] Evaluate(double[] x)
         {
-            return x;
+            return x.ToArray();
         }
 
         /// <summary>
@@ -31,9 +32,9 @@ namespace AD.Mathematics.LinkFunctions
         /// <returns>
         /// The function value at the argument.
         /// </returns>
-        public double Inverse(double x)
+        public double[] Inverse(double[] x)
         {
-            return 1.0 / x;
+            return x.Select(y => 1.0 / y).ToArray();
         }
 
         /// <summary>
@@ -45,9 +46,9 @@ namespace AD.Mathematics.LinkFunctions
         /// <returns>
         /// The first derivative value at the argument.
         /// </returns>
-        public double FirstDerivative(double x)
+        public double[] FirstDerivative(double[] x)
         {
-            return 1.0;
+            return Enumerable.Repeat(1.0, x.Length).ToArray();
         }
 
         /// <summary>
@@ -59,9 +60,9 @@ namespace AD.Mathematics.LinkFunctions
         /// <returns>
         /// The second derivative value at the argument.
         /// </returns>
-        public double SecondDerivative(double x)
+        public double[] SecondDerivative(double[] x)
         {
-            return 0.0;
+            return new double[x.Length];
         }
     }
 }

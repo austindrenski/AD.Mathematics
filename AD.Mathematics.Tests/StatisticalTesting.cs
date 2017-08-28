@@ -45,8 +45,7 @@ namespace AD.Mathematics.Tests
         [Fact]
         public static void Test0()
         {
-            const int precision = 8;
-            ArrayEqualityComparer comparer = new ArrayEqualityComparer(precision);
+            UnitTestEqualityComparer comparer = new UnitTestEqualityComparer(8);
 
             double[][] input =
                 GravityCourseData.Where(x => x.Trade > 0)
@@ -66,7 +65,7 @@ namespace AD.Mathematics.Tests
                                  .ToArray();
 
             GeneralizedLinearModel<double> generalized =
-                GeneralizedLinearModel.OlsRegression(input, response);
+                GeneralizedLinearModel.OrdinaryLeastSquares(input, response);
 
             int n = input.Length;
             int k = input[0].Length + 1;
@@ -88,8 +87,8 @@ namespace AD.Mathematics.Tests
             Assert.Equal(k, generalized.VariableCount);
             Assert.Equal(df, generalized.DegreesOfFreedom);
 
-            Assert.Equal(mse, generalized.MeanSquaredError, precision);
-            Assert.Equal(sse, generalized.SumSquaredErrors, precision);
+            Assert.Equal(mse, generalized.MeanSquaredError, comparer.Precision);
+            Assert.Equal(sse, generalized.SumSquaredErrors, comparer.Precision);
 
             Assert.Equal(coefficients, generalized.Coefficients, comparer);
 
@@ -105,6 +104,8 @@ namespace AD.Mathematics.Tests
         [Fact]
         public static void Test1()
         {
+            UnitTestEqualityComparer comparer = new UnitTestEqualityComparer(8);
+
             double[][] input  =
                 GravityCourseData.Select(
                                      x => new double[]
@@ -127,24 +128,33 @@ namespace AD.Mathematics.Tests
             GeneralizedLinearModel<int> generalized =
                 new GeneralizedLinearModel<int>(input, response, weights, new PoissonDistribution(), 1.0);
 
-            Assert.Equal(99981, generalized.ObservationCount);
-            Assert.Equal(5, generalized.VariableCount);
-            Assert.Equal(99976, generalized.DegreesOfFreedom);
+            int n = input.Length;
+            int k = input[0].Length + 1;
+            int df = n - k;
 
-            Assert.Equal(
-                new double[] { 14.3401, -0.7727, 0.1800, -0.8762, -0.0784 }, 
-                generalized.Coefficients.Select(x => Math.Round(x, 4)));
+            double[] coefficients = new double[] { 14.34011355,  -0.77265135,   0.18003745,  -0.87616156,  -0.07842665 };
+            
+            double[] varianceOLS = new double[] { 2.47622006e-08, 4.80378670e-10, 5.14379692e-08, 5.98550930e-08, 1.97414603e-07 };
+            double[] varianceHC0 = new double[] { 0.01842182,  0.00027302,  0.0054894 ,  0.00458959,  0.00451205 };
+            double[] varianceHC1 = new double[] { 0.01842182,  0.00027302,  0.0054894 ,  0.00458959,  0.00451205 };
 
-            //Assert.Equal(, generalized.MeanSquaredError);
-            //Assert.Equal(, generalized.SumSquaredErrors);
+            double[] standardErrorsOLS = varianceOLS.Select(Math.Sqrt).ToArray();
+            double[] standardErrorsHC0 = varianceHC0.Select(Math.Sqrt).ToArray();
+            double[] standardErrorsHC1 = varianceHC1.Select(Math.Sqrt).ToArray();
 
-            //Assert.Equal(, generalized.StandardErrors);
-            //Assert.Equal(, generalized.StandardErrorsHc0);
-            //Assert.Equal(, generalized.StandardErrorsHc1);
+            Assert.Equal(n, generalized.ObservationCount);
+            Assert.Equal(k, generalized.VariableCount);
+            Assert.Equal(df, generalized.DegreesOfFreedom);
 
-            //Assert.Equal(, generalized.Variance);
-            //Assert.Equal(, generalized.VarianceHc0);
-            //Assert.Equal(, generalized.VarianceHc1);
+            Assert.Equal(coefficients, generalized.Coefficients, comparer);
+
+            Assert.Equal(varianceOLS, generalized.VarianceOLS, comparer);
+            Assert.Equal(varianceHC0, generalized.VarianceHC0, comparer);
+            Assert.Equal(varianceHC1, generalized.VarianceHC1, comparer);
+
+            Assert.Equal(standardErrorsOLS, generalized.StandardErrorsOLS, comparer);
+            Assert.Equal(standardErrorsHC0, generalized.StandardErrorsHC0, comparer);
+            Assert.Equal(standardErrorsHC1, generalized.StandardErrorsHC1, comparer);
         }
     }
 }

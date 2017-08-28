@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using JetBrains.Annotations;
 
 namespace AD.Mathematics.LinkFunctions
@@ -23,7 +24,7 @@ namespace AD.Mathematics.LinkFunctions
         public double Slope { get; }
 
         /// <summary>
-        /// Constructs a <see cref="LogitLinkFunction"/> for the given <paramref name="slope"/> and <paramref name="intercept"/>.
+        /// Constructs a <see cref="LogLinkFunction"/> for the given <paramref name="slope"/> and <paramref name="intercept"/>.
         /// </summary>
         /// <param name="slope">
         /// The slope value. Defaults to 1.0.
@@ -50,9 +51,9 @@ namespace AD.Mathematics.LinkFunctions
         /// f(x) = (Log(x) - <see cref="Intercept"/>) / <see cref="Slope"/>.
         /// </remarks>
         [Pure]
-        public double Evaluate(double x)
+        public double[] Evaluate(double[] x)
         {
-            return (Math.Log(x) - Intercept) / Slope;
+            return x.Select(Check).Select(y => Math.Log(y)).ToArray();
         }
 
         /// <summary>
@@ -68,9 +69,9 @@ namespace AD.Mathematics.LinkFunctions
         /// f(x) = exp(<see cref="Slope"/> * <paramref name="x"/> + <see cref="Intercept"/>).
         /// </remarks>
         [Pure]
-        public double Inverse(double x)
+        public double[] Inverse(double[] x)
         {
-            return Math.Exp(Slope * x + Intercept);
+            return x.Select(Math.Exp).ToArray();
         }
 
         /// <summary>
@@ -82,9 +83,9 @@ namespace AD.Mathematics.LinkFunctions
         /// <returns>
         /// The first derivative value at the argument.
         /// </returns>
-        public double FirstDerivative(double x)
+        public double[] FirstDerivative(double[] x)
         {
-            return Slope * Math.Exp(Slope * x + Intercept);
+            return x.Select(Check).Select(y => 1.0 / y).ToArray();
         }
 
         /// <summary>
@@ -96,27 +97,19 @@ namespace AD.Mathematics.LinkFunctions
         /// <returns>
         /// The second derivative value at the argument.
         /// </returns>
-        public double SecondDerivative(double x)
+        public double[] SecondDerivative(double[] x)
         {
-            return Slope * x;
+            return x.Select(Check).Select(y => -1.0 / (y * y)).ToArray();
         }
 
-        /// <summary>
-        /// The mean function.
-        /// </summary>
-        /// <param name="x">
-        /// The function argument.
-        /// </param>
-        /// <returns>
-        /// The function value at the argument.
-        /// </returns>
-        /// <remarks>
-        /// f(x) = <see cref="Slope"/> * <paramref name="x"/> + <see cref="Intercept"/>.
-        /// </remarks>
-        [Pure]
-        public double MeanFunction(double x)
+        public double[] InverseDerivative(double[] x)
         {
-            return Slope * x + Intercept;
+            return x.Select(Math.Exp).ToArray();
+        }
+
+        private static double Check(double x)
+        {
+            return double.Epsilon < x ? x : double.Epsilon;
         }
     }
 }

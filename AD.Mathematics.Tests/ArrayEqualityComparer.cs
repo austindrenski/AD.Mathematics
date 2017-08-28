@@ -3,12 +3,15 @@ using System.Collections.Generic;
 
 namespace AD.Mathematics.Tests
 {
-    public class ArrayEqualityComparer : IEqualityComparer<double>
+    public class UnitTestEqualityComparer : IEqualityComparer<double>
     {
+        public int Precision { get; }
+
         private readonly double _tolerance;
 
-        public ArrayEqualityComparer(uint precision)
+        public UnitTestEqualityComparer(int precision)
         {
+            Precision = precision;
             _tolerance = Math.Pow(1, -precision);
         }
 

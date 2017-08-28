@@ -373,7 +373,7 @@ namespace AD.Mathematics.Matrix
             
             if (arrayA[0].Length != arrayB.Length)
             {
-                throw new InvalidOperationException("Operation requires inner dimmensions to match.");
+                throw new ArrayConformabilityException<double>(arrayA, arrayB);
             }
 
             double[] result = new double[arrayA.Length];
@@ -878,7 +878,7 @@ namespace AD.Mathematics.Matrix
             }
             if (a[0].Length != b.Length)
             {
-                throw new InvalidOperationException("Operation requires inner dimmensions to match.");
+                throw new ArrayConformabilityException<double>(a, b);
             }
 
             double[][] result = new double[a.Length][];

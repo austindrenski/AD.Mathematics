@@ -141,7 +141,7 @@ namespace AD.Mathematics.Distributions
         /// A linear prediction value.
         /// </returns>
         [Pure]
-        double Predict(double meanResponse);
+        double[] Predict(double[] meanResponse);
 
         /// <summary>
         /// Calculates a mean response value given a linear prediction.
@@ -153,7 +153,7 @@ namespace AD.Mathematics.Distributions
         /// A mean response value.
         /// </returns>
         [Pure]
-        double Fit(double linearPredicton);
+        double[] Fit(double[] linearPredicton);
 
         /// <summary>
         /// Calculates the weight for a step of the Iteratively Reweighted Least Squares (IRLS) algorithm.
@@ -165,7 +165,7 @@ namespace AD.Mathematics.Distributions
         /// A weight based on the mean response.
         /// </returns>
         [Pure]
-        double Weight(double meanResponse);
+        double[] Weight(double[] meanResponse);
 
         /// <summary>
         /// Provides an initial mean response array for the Iteratively Reweighted Least Squares (IRLS) algorithm.

@@ -7,10 +7,10 @@ namespace AD.Mathematics.Matrix
     /// Extension methods to perform weighted least squares regression.
     /// </summary>
     [PublicAPI]
-    public static class WeightedLeastSquares
+    public static class RegressionWLS
     {
         [Pure]
-        public static (double[] Results, double[] Fitted, double[] Residuals, double Scale) RegressWls([NotNull] [ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] double[] weights)
+        public static (double[] Results, double[] Fitted, double[] Residuals, double Scale) RegressWLS([NotNull] [ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] double[] weights)
         {
             if (design is null)
             {
@@ -29,43 +29,75 @@ namespace AD.Mathematics.Matrix
                 throw new ArrayConformabilityException<double>(design, response);
             }
 
-            double[] rootWeights = new double[weights.Length];
-            double[] weightedResponse = new double[weights.Length];
-            double[][] weightedDesign = new double[weights.Length][];
+            double[][] x = design;
 
-            for (int i = 0; i < rootWeights.Length; i++)
+            double[][] xt = x.Transpose();
+
+            double[][] xtwtw = new double[xt.Length][];
+
+            for (int i = 0; i < xt.Length; i++)
             {
-                rootWeights[i] = Math.Sqrt(weights[i]);
+                xtwtw[i] = new double[xt[i].Length];
 
-                weightedResponse[i] = rootWeights[i] * response[i];
-
-                weightedDesign[i] = new double[design[i].Length];
-
-                for (int j = 0; j < weightedDesign[i].Length; j++)
+                for (int j = 0; j < xt[i].Length; j++)
                 {
-                    weightedDesign[i][j] = rootWeights[i] * design[i][j];
+                    xtwtw[i][j] = weights[j] * weights[j] * xt[i][j];
                 }
             }
 
-            double[] result = weightedDesign.SolveQr(response);
+            double[][] xtwtwxinvxt = xtwtw.CrossProduct(x).InvertLu().CrossProduct(xt);
 
-            double[] fitted = design.CrossProduct(result);
-            double[] weightedFitted = weightedDesign.CrossProduct(result);
+            double[][] xtwtwxinvxtwtw = new double[xtwtwxinvxt.Length][];
 
-            double[] residuals = new double[fitted.Length];
-            double[] weightedResiduals = new double[fitted.Length];
-            
-            for (int i = 0; i < residuals.Length; i++)
+            for (int i = 0; i < xt.Length; i++)
             {
-                residuals[i] = response[i] - fitted[i];
-                weightedResiduals[i] = weightedResponse[i] - weightedFitted[i];
+                xtwtwxinvxtwtw[i] = new double[xtwtwxinvxt[i].Length];
+
+                for (int j = 0; j < xt[i].Length; j++)
+                {
+                    xtwtwxinvxtwtw[i][j] = weights[j] * weights[j] * xtwtwxinvxt[i][j];
+                }
             }
 
-            int degreesOfFreedomResidual = weightedDesign.Length - weightedDesign[0].Length;
+            return (xtwtwxinvxtwtw.CrossProduct(response), null, null, 0);
 
-            double scale = weightedResiduals.DotProduct(weightedResiduals, 0, weightedResiduals.Length) / degreesOfFreedomResidual;
+            //double[] rootWeights = new double[weights.Length];
+            //double[] weightedResponse = new double[weights.Length];
+            //double[][] weightedDesign = new double[weights.Length][];
 
-            return (result, fitted, residuals, scale);
+            //for (int i = 0; i < rootWeights.Length; i++)
+            //{
+            //    rootWeights[i] = Math.Sqrt(weights[i]);
+
+            //    weightedResponse[i] = rootWeights[i] * response[i];
+
+            //    weightedDesign[i] = new double[design[i].Length];
+
+            //    for (int j = 0; j < weightedDesign[i].Length; j++)
+            //    {
+            //        weightedDesign[i][j] = rootWeights[i] * design[i][j];
+            //    }
+            //}
+
+            //double[] result = weightedDesign.SolveQr(response);
+
+            //double[] fitted = design.CrossProduct(result);
+            //double[] weightedFitted = weightedDesign.CrossProduct(result);
+
+            //double[] residuals = new double[fitted.Length];
+            //double[] weightedResiduals = new double[fitted.Length];
+
+            //for (int i = 0; i < residuals.Length; i++)
+            //{
+            //    residuals[i] = response[i] - fitted[i];
+            //    weightedResiduals[i] = weightedResponse[i] - weightedFitted[i];
+            //}
+
+            //int degreesOfFreedomResidual = weightedDesign.Length - weightedDesign[0].Length;
+
+            //double scale = weightedResiduals.DotProduct(weightedResiduals, 0, weightedResiduals.Length) / degreesOfFreedomResidual;
+
+            //return (result, fitted, residuals, scale);
         }
     }
 }

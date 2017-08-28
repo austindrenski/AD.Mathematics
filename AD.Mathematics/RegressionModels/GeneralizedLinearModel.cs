@@ -23,7 +23,7 @@ namespace AD.Mathematics.RegressionModels
         /// <returns>
         /// A GLM based on the OLS regression model.
         /// </returns>
-        public static GeneralizedLinearModel<double> OlsRegression([NotNull][ItemNotNull] double[][] design, [NotNull] double[] response)
+        public static GeneralizedLinearModel<double> OrdinaryLeastSquares([NotNull][ItemNotNull] double[][] design, [NotNull] double[] response)
         {
             if (design is null)
             {
@@ -38,7 +38,7 @@ namespace AD.Mathematics.RegressionModels
                 throw new ArrayConformabilityException<double>(design, response);
             }
 
-            return WeightedOlsRegression(design, response, Enumerable.Repeat(1.0, response.Length).ToArray());
+            return WeightedLeastSquares(design, response, Enumerable.Repeat(1.0, response.Length).ToArray());
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace AD.Mathematics.RegressionModels
         /// <returns>
         /// A GLM based on the OLS regression model.
         /// </returns>
-        public static GeneralizedLinearModel<double> WeightedOlsRegression(double[][] design, double[] response, double[] weights)
+        public static GeneralizedLinearModel<double> WeightedLeastSquares(double[][] design, double[] response, double[] weights)
         {
             if (design is null)
             {

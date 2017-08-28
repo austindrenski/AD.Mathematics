@@ -8,13 +8,13 @@ namespace AD.Mathematics.Matrix
     /// Defines parallel matrix operations.
     /// </summary>
     [PublicAPI]
-    public static class RegressionOls
+    public static class RegressionOLS
     {
         /// <summary>
         /// Specifies the solution technique.
         /// </summary>
         [PublicAPI]
-        public enum OlsType
+        public enum Solution
         {
             LuInversion,
             LuFactorization,
@@ -46,7 +46,7 @@ namespace AD.Mathematics.Matrix
         /// </remarks>
         [Pure]
         [NotNull]
-        public static float[] RegressOls([NotNull][ItemNotNull] this float[][] design, [NotNull] float[] response)
+        public static float[] RegressOLS([NotNull][ItemNotNull] this float[][] design, [NotNull] float[] response)
         {
             if (response is null)
             {
@@ -94,7 +94,7 @@ namespace AD.Mathematics.Matrix
         /// </remarks>
         [Pure]
         [NotNull]
-        public static double[] RegressOls([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response)
+        public static double[] RegressOLS([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response)
         {
             if (response is null)
             {
@@ -142,7 +142,7 @@ namespace AD.Mathematics.Matrix
         /// </remarks>
         [Pure]
         [NotNull]
-        public static decimal[] RegressOls([NotNull][ItemNotNull] this decimal[][] design, [NotNull] decimal[] response)
+        public static decimal[] RegressOLS([NotNull][ItemNotNull] this decimal[][] design, [NotNull] decimal[] response)
         {
             if (response is null)
             {
@@ -193,7 +193,7 @@ namespace AD.Mathematics.Matrix
         /// </remarks>
         [Pure]
         [NotNull]
-        public static float[] RegressOls([NotNull][ItemNotNull] this float[][] design, [NotNull] float[] response, [NotNull] ParallelOptions options)
+        public static float[] RegressOLS([NotNull][ItemNotNull] this float[][] design, [NotNull] float[] response, [NotNull] ParallelOptions options)
         {
             if (response is null)
             {
@@ -248,7 +248,7 @@ namespace AD.Mathematics.Matrix
         /// </remarks>
         [Pure]
         [NotNull]
-        public static double[] RegressOls([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] ParallelOptions options)
+        public static double[] RegressOLS([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] ParallelOptions options)
         {
             if (response is null)
             {
@@ -303,7 +303,7 @@ namespace AD.Mathematics.Matrix
         /// </remarks>
         [Pure]
         [NotNull]
-        public static decimal[] RegressOls([NotNull][ItemNotNull] this decimal[][] design, [NotNull] decimal[] response, [NotNull] ParallelOptions options)
+        public static decimal[] RegressOLS([NotNull][ItemNotNull] this decimal[][] design, [NotNull] decimal[] response, [NotNull] ParallelOptions options)
         {
             if (response is null)
             {
@@ -358,7 +358,7 @@ namespace AD.Mathematics.Matrix
         /// </remarks>
         [Pure]
         [NotNull]
-        public static float[] RegressOls([NotNull][ItemNotNull] this float[][] design, [NotNull] float[] response, float constant)
+        public static float[] RegressOLS([NotNull][ItemNotNull] this float[][] design, [NotNull] float[] response, float constant)
         {
             if (response is null)
             {
@@ -369,7 +369,7 @@ namespace AD.Mathematics.Matrix
                 throw new ArgumentNullException(nameof(design));
             }
 
-            return RegressOls(design.Prepend(constant), response);
+            return RegressOLS(design.Prepend(constant), response);
         }
 
         /// <summary>
@@ -400,7 +400,7 @@ namespace AD.Mathematics.Matrix
         /// </remarks>
         [Pure]
         [NotNull]
-        public static double[] RegressOls([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, double constant)
+        public static double[] RegressOLS([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, double constant)
         {
             if (response is null)
             {
@@ -411,7 +411,7 @@ namespace AD.Mathematics.Matrix
                 throw new ArgumentNullException(nameof(design));
             }
 
-            return RegressOls(design.Prepend(constant), response);
+            return RegressOLS(design.Prepend(constant), response);
         }
 
         /// <summary>
@@ -442,7 +442,7 @@ namespace AD.Mathematics.Matrix
         /// </remarks>
         [Pure]
         [NotNull]
-        public static decimal[] RegressOls([NotNull][ItemNotNull] this decimal[][] design, [NotNull] decimal[] response, decimal constant)
+        public static decimal[] RegressOLS([NotNull][ItemNotNull] this decimal[][] design, [NotNull] decimal[] response, decimal constant)
         {
             if (response is null)
             {
@@ -453,56 +453,7 @@ namespace AD.Mathematics.Matrix
                 throw new ArgumentNullException(nameof(design));
             }
 
-            return RegressOls(design.Prepend(constant), response);
-        }
-
-        /// <summary>
-        /// Calculates a linear regression given a system of coefficients. The coefficient matrix is prepended by a vector of constants.
-        /// </summary>
-        /// <param name="design">
-        /// The design variables.
-        /// </param>
-        /// <param name="response">
-        /// The response variables.
-        /// </param>
-        /// <param name="constant">
-        /// A constant value to prepend the response variable array.
-        /// </param>
-        /// <param name="options">
-        /// Options for running this method in parallel.
-        /// </param>
-        /// <returns>
-        /// A vector of coefficients.
-        /// </returns>
-        /// <remarks>
-        /// Caclulates the standard linear regression via ordinary least squares (OLS):
-        ///      
-        ///     β = (Xᵀ * X)⁻¹ * Xᵀ * Y
-        /// 
-        /// Where:
-        /// 
-        ///     X = design
-        ///     Y = response
-        ///     β = coefficients
-        /// </remarks>
-        [Pure]
-        [NotNull]
-        public static float[] RegressOls([NotNull][ItemNotNull] this float[][] design, [NotNull] float[] response, float constant, [NotNull] ParallelOptions options)
-        {
-            if (response is null)
-            {
-                throw new ArgumentNullException(nameof(response));
-            }
-            if (design is null)
-            {
-                throw new ArgumentNullException(nameof(design));
-            }
-            if (options is null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
-            return RegressOls(design.Prepend(constant, options), response, options);
+            return RegressOLS(design.Prepend(constant), response);
         }
 
         /// <summary>
@@ -536,7 +487,7 @@ namespace AD.Mathematics.Matrix
         /// </remarks>
         [Pure]
         [NotNull]
-        public static double[] RegressOls([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, double constant, [NotNull] ParallelOptions options)
+        public static float[] RegressOLS([NotNull][ItemNotNull] this float[][] design, [NotNull] float[] response, float constant, [NotNull] ParallelOptions options)
         {
             if (response is null)
             {
@@ -551,7 +502,7 @@ namespace AD.Mathematics.Matrix
                 throw new ArgumentNullException(nameof(options));
             }
 
-            return RegressOls(design.Prepend(constant, options), response, options);
+            return RegressOLS(design.Prepend(constant, options), response, options);
         }
 
         /// <summary>
@@ -585,7 +536,7 @@ namespace AD.Mathematics.Matrix
         /// </remarks>
         [Pure]
         [NotNull]
-        public static decimal[] RegressOls([NotNull][ItemNotNull] this decimal[][] design, [NotNull] decimal[] response, decimal constant, [NotNull] ParallelOptions options)
+        public static double[] RegressOLS([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, double constant, [NotNull] ParallelOptions options)
         {
             if (response is null)
             {
@@ -600,7 +551,56 @@ namespace AD.Mathematics.Matrix
                 throw new ArgumentNullException(nameof(options));
             }
 
-            return RegressOls(design.Prepend(constant, options), response, options);
+            return RegressOLS(design.Prepend(constant, options), response, options);
+        }
+
+        /// <summary>
+        /// Calculates a linear regression given a system of coefficients. The coefficient matrix is prepended by a vector of constants.
+        /// </summary>
+        /// <param name="design">
+        /// The design variables.
+        /// </param>
+        /// <param name="response">
+        /// The response variables.
+        /// </param>
+        /// <param name="constant">
+        /// A constant value to prepend the response variable array.
+        /// </param>
+        /// <param name="options">
+        /// Options for running this method in parallel.
+        /// </param>
+        /// <returns>
+        /// A vector of coefficients.
+        /// </returns>
+        /// <remarks>
+        /// Caclulates the standard linear regression via ordinary least squares (OLS):
+        ///      
+        ///     β = (Xᵀ * X)⁻¹ * Xᵀ * Y
+        /// 
+        /// Where:
+        /// 
+        ///     X = design
+        ///     Y = response
+        ///     β = coefficients
+        /// </remarks>
+        [Pure]
+        [NotNull]
+        public static decimal[] RegressOLS([NotNull][ItemNotNull] this decimal[][] design, [NotNull] decimal[] response, decimal constant, [NotNull] ParallelOptions options)
+        {
+            if (response is null)
+            {
+                throw new ArgumentNullException(nameof(response));
+            }
+            if (design is null)
+            {
+                throw new ArgumentNullException(nameof(design));
+            }
+            if (options is null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            return RegressOLS(design.Prepend(constant, options), response, options);
         }
     }
 }
