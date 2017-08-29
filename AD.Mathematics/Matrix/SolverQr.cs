@@ -78,11 +78,11 @@ namespace AD.Mathematics.Matrix
             double[][] transpose = 
                 design.Transpose();
 
-            double[][] designTransposeCrossDesign = transpose.CrossProduct(design);
+            double[][] designTransposeCrossDesign = transpose.MatrixProduct(design);
 
             (double[][] orthogonal, double[][] upper) = designTransposeCrossDesign.DecomposeQr();
 
-            double[] t = orthogonal.Transpose().CrossProduct(transpose).CrossProduct(response);
+            double[] t = orthogonal.Transpose().MatrixProduct(transpose).MatrixProduct(response);
 
             return upper.SolveLu(t);
         }

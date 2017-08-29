@@ -45,7 +45,7 @@ namespace AD.Mathematics.Matrix
                 }
             }
 
-            double[][] xtwtwxinvxt = xtwtw.CrossProduct(x).InvertLu().CrossProduct(xt);
+            double[][] xtwtwxinvxt = xtwtw.MatrixProduct(x).InvertLu().MatrixProduct(xt);
 
             double[][] xtwtwxinvxtwtw = new double[xtwtwxinvxt.Length][];
 
@@ -59,7 +59,7 @@ namespace AD.Mathematics.Matrix
                 }
             }
 
-            return (xtwtwxinvxtwtw.CrossProduct(response), null, null, 0);
+            return (xtwtwxinvxtwtw.MatrixProduct(response), null, null, 0);
 
             //double[] rootWeights = new double[weights.Length];
             //double[] weightedResponse = new double[weights.Length];
@@ -81,8 +81,8 @@ namespace AD.Mathematics.Matrix
 
             //double[] result = weightedDesign.SolveQr(response);
 
-            //double[] fitted = design.CrossProduct(result);
-            //double[] weightedFitted = weightedDesign.CrossProduct(result);
+            //double[] fitted = design.MatrixProduct(result);
+            //double[] weightedFitted = weightedDesign.MatrixProduct(result);
 
             //double[] residuals = new double[fitted.Length];
             //double[] weightedResiduals = new double[fitted.Length];

@@ -290,7 +290,7 @@ namespace AD.Mathematics.RegressionModels
         /// </returns>
         public double LogLikelihood([NotNull] IReadOnlyList<double> response, double scale = 1.0)
         {
-            double[] linearPrediction = _design.CrossProduct(response); // + self.offset_exposure
+            double[] linearPrediction = _design.MatrixProduct(response); // + self.offset_exposure
 
             double[] meanResponse = _family.LinkFunction.Inverse(linearPrediction);
 

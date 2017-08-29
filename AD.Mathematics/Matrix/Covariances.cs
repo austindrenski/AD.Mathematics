@@ -87,7 +87,7 @@ namespace AD.Mathematics.Matrix
         [ItemNotNull]
         private static double[][] Covariance([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] squaredErrors)
         {
-            double[][] informationMatrix = design.Transpose().CrossProduct(design).InvertLu();
+            double[][] informationMatrix = design.Transpose().MatrixProduct(design).InvertLu();
 
             double mean = squaredErrors.Sum() / (design.Length - design[0].Length);
             
@@ -140,11 +140,11 @@ namespace AD.Mathematics.Matrix
                 }
             }
 
-            double[][] inner = temp.CrossProduct(design);
+            double[][] inner = temp.MatrixProduct(design);
 
-            double[][] informationMatrix = designTranspose.CrossProduct(design).InvertLu();
+            double[][] informationMatrix = designTranspose.MatrixProduct(design).InvertLu();
 
-            return informationMatrix.CrossProduct(inner).CrossProduct(informationMatrix);
+            return informationMatrix.MatrixProduct(inner).MatrixProduct(informationMatrix);
         }
     }
 }

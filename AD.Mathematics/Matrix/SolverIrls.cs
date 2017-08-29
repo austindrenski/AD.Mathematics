@@ -53,7 +53,7 @@ namespace AD.Mathematics.Matrix
 
             double[] bestBeta = new double[beta.Length];
 
-            double[] probability = Enumerable.Repeat(1.0, response.Length).ToArray();//design.CrossProduct(beta).Select(function).ToArray(); // design.Probability(beta);
+            double[] probability = Enumerable.Repeat(1.0, response.Length).ToArray();//design.MatrixProduct(beta).Select(function).ToArray(); // design.Probability(beta);
 
             double meanSquaredError = probability.SquaredError(response).Average();
 
@@ -68,7 +68,7 @@ namespace AD.Mathematics.Matrix
                     return bestBeta;
                 }
 
-                probability = design.CrossProduct(newBeta).Select(function).ToArray(); // design.Probability(newBeta);
+                probability = design.MatrixProduct(newBeta).Select(function).ToArray(); // design.Probability(newBeta);
 
                 double newMeanSquaredError = probability.SquaredError(response).Average();
 
@@ -151,7 +151,7 @@ namespace AD.Mathematics.Matrix
 
             // Xᵀ * W * X
             double[][] xtwx =
-                xt.CrossProduct(wx);
+                xt.MatrixProduct(wx);
 
             // (Xᵀ * W * X)⁻¹
             double[][] invxtwx =
@@ -159,7 +159,7 @@ namespace AD.Mathematics.Matrix
 
             // (Xᵀ * W * X)⁻¹ * Xᵀ
             double[][] invxtwxxt =
-                invxtwx.CrossProduct(xt);
+                invxtwx.MatrixProduct(xt);
 
             // Y - P
             double[] yp =
@@ -167,18 +167,18 @@ namespace AD.Mathematics.Matrix
 
             // (Xᵀ * W * X)⁻¹ * Xᵀ * (Y - P)
             double[] b =
-                invxtwxxt.CrossProduct(yp);
+                invxtwxxt.MatrixProduct(yp);
 
             // B + (Xᵀ * W * X)⁻¹ * Xᵀ * (Y - P)
             return beta.Add(b);
 
-            //.SolveQr(designTranspose.CrossProduct(responseMinusProbability));
+            //.SolveQr(designTranspose.MatrixProduct(responseMinusProbability));
 
             //double[] b =
-            //    designTranspose.CrossProduct(tildeX)
+            //    designTranspose.MatrixProduct(tildeX)
             //                   .InvertLu()
-            //                   .CrossProduct(designTranspose)
-            //                   .CrossProduct(responseMinusProbability);
+            //                   .MatrixProduct(designTranspose)
+            //                   .MatrixProduct(responseMinusProbability);
 
         }
 

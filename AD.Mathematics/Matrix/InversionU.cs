@@ -37,7 +37,7 @@ namespace AD.Mathematics.Matrix
                 }
             }
 
-            return identity.Add(strictUpper).InvertLu().CrossProduct(diagonalInverse);
+            return identity.Add(strictUpper).InvertLu().MatrixProduct(diagonalInverse);
         }
     }
 }
