@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using AD.Mathematics.Matrix;
+using JetBrains.Annotations;
 using Xunit;
 
 namespace AD.Mathematics.Tests
 {
+    [PublicAPI]
     public class MatrixProductTesting
     {
-        [Theory]
+        [Theory(Skip = "Use this for benchmarking -- not unit testing.")]
         [InlineData(2000)]
         public void TestMethod0(int size)
         {
@@ -28,6 +27,7 @@ namespace AD.Mathematics.Tests
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
+            // ReSharper disable once UnusedVariable
             double[][] c = a.MatrixProduct(b, o);
 
             sw.Stop();
