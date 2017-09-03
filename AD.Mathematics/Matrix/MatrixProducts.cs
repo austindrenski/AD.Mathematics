@@ -70,9 +70,11 @@ namespace AD.Mathematics.Matrix
             {
                 double sum = 0.0;
 
-                for (int j = 0; j < arrayA[0].Length; j++)
+                double[] innerA = arrayA[i];
+
+                for (int j = 0; j < arrayB.Length; j++)
                 {
-                    sum += arrayA[i][j] * arrayB[j];
+                    sum += innerA[j] * arrayB[j];
                 }
 
                 result[i] = sum;
@@ -121,16 +123,19 @@ namespace AD.Mathematics.Matrix
             {
                 result[i] = new double[arrayB[0].Length];
 
-                for (int j = 0; j < arrayB[0].Length; j++)
+                double[] innerA = arrayA[i];
+                double[] innerResult = result[i];
+
+                for (int k = 0; k < innerA.Length; k++)
                 {
-                    double sum = 0.0;
+                    double valueInnerA = innerA[k];
 
-                    for (int k = 0; k < arrayA[0].Length; k++)
+                    double[] innerB = arrayB[k];
+                    
+                    for (int j = 0; j < innerB.Length; j++)
                     {
-                        sum += arrayA[i][k] * arrayB[k][j];
+                        innerResult[j] += valueInnerA * innerB[j];
                     }
-
-                    result[i][j] = sum;
                 }
             }
 
@@ -205,9 +210,11 @@ namespace AD.Mathematics.Matrix
             {
                 double sum = 0.0;
 
-                for (int j = 0; j < arrayA[0].Length; j++)
+                double[] innerA = arrayA[i];
+
+                for (int j = 0; j < arrayB.Length; j++)
                 {
-                    sum += arrayA[i][j] * arrayB[j];
+                    sum += innerA[j] * arrayB[j];
                 }
 
                 result[i] = sum;
@@ -263,16 +270,19 @@ namespace AD.Mathematics.Matrix
             {
                 result[i] = new double[arrayB[0].Length];
 
-                for (int j = 0; j < arrayB[0].Length; j++)
+                double[] innerA = arrayA[i];
+                double[] innerResult = result[i];
+
+                for (int k = 0; k < innerA.Length; k++)
                 {
-                    double sum = 0.0;
+                    double valueInnerA = innerA[k];
 
-                    for (int k = 0; k < arrayA[0].Length; k++)
+                    double[] innerB = arrayB[k];
+
+                    for (int j = 0; j < innerB.Length; j++)
                     {
-                        sum += arrayA[i][k] * arrayB[k][j];
+                        innerResult[j] += valueInnerA * innerB[j];
                     }
-
-                    result[i][j] = sum;
                 }
             });
 
