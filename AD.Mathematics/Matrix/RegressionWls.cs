@@ -7,10 +7,19 @@ namespace AD.Mathematics.Matrix
     /// Extension methods to perform weighted least squares regression.
     /// </summary>
     [PublicAPI]
-    public static class RegressionWLS
+    public static class RegressionWls
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="design"></param>
+        /// <param name="response"></param>
+        /// <param name="weights"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArrayConformabilityException{T}"></exception>
         [Pure]
-        public static (double[] Results, double[] Fitted, double[] Residuals, double Scale) RegressWLS([NotNull] [ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] double[] weights)
+        public static (double[] Results, double[] Fitted, double[] Residuals, double Scale) RegressWls([NotNull] [ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] double[] weights)
         {
             if (design is null)
             {

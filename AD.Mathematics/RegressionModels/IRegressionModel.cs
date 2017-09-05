@@ -49,7 +49,7 @@ namespace AD.Mathematics.RegressionModels
         /// The standard errors for the model intercept and coefficients ≡ SE = sqrt(σ²) = sqrt(Σ(xᵢ - x̄)²).
         /// </summary>
         [NotNull]
-        IReadOnlyList<double> StandardErrorsOLS { get; }
+        IReadOnlyList<double> StandardErrorsOls { get; }
 
         /// <summary>
         /// HCO (White, 1980): the original White (1980) standard errors ≡ Xᵀ * [eᵢ²] * X.
@@ -67,7 +67,7 @@ namespace AD.Mathematics.RegressionModels
         /// The variance for the model ≡ σ² = Σ(xᵢ - x̄)².
         /// </summary>
         [NotNull]
-        IEnumerable<double> VarianceOLS { get; }
+        IEnumerable<double> VarianceOls { get; }
 
         /// <summary>
         /// The variance for the model based on HC0 scaling.

@@ -59,7 +59,7 @@ namespace AD.Mathematics.Matrix
                 {
                     return designArray.Covariance(squaredErrorsArray, (double)designArray.Length / (designArray.Length - designArray[0].Length));
                 }
-                case HeteroscedasticityConsistent.OLS:
+                case HeteroscedasticityConsistent.Ols:
                 {
                     return designArray.Covariance(squaredErrorsArray);
                 }

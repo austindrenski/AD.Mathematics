@@ -11,17 +11,14 @@
     <PackageProjectUrl>https://github.com/austindrenski/AD.Mathematics</PackageProjectUrl>
     <RepositoryUrl>https://github.com/austindrenski/AD.Mathematics</RepositoryUrl>
   </PropertyGroup>
-  
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DocumentationFile>bin\Release\netstandard2.0\AD.Mathematics.xml</DocumentationFile>
   </PropertyGroup>
-  
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <DocumentationFile>bin\Debug\netstandard2.0\AD.Mathematics.xml</DocumentationFile>
   </PropertyGroup>
-  
   <ItemGroup>
     <PackageReference Include="AD.IO" Version="1.3.0" />
     <PackageReference Include="JetBrains.Annotations" Version="11.0.0" />

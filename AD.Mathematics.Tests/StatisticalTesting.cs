@@ -19,7 +19,7 @@ namespace AD.Mathematics.Tests
         static StatisticalTesting()
         {
             GravityCourseData =
-                File.ReadLines("\\users\\adren\\desktop\\grav_data_course.csv")
+                File.ReadLines("\\users\\austin.drenski\\desktop\\grav_data_course.csv")
                     .SplitDelimitedLine(',')
                     .Skip(1)
                     .Select(x => x.Select(y => y.Trim()).ToArray())
@@ -43,7 +43,7 @@ namespace AD.Mathematics.Tests
         /// Test that the <see cref="GeneralizedLinearModel{T}"/> with a <see cref="GaussianDistribution"/> replicates a known regression.
         /// </summary>
         [Fact]
-        public static void Test0()
+        public static void GlmGaussianTest()
         {
             UnitTestEqualityComparer comparer = new UnitTestEqualityComparer(8);
 
@@ -75,11 +75,11 @@ namespace AD.Mathematics.Tests
 
             double[] coefficients = new double[] { 13.420712, -1.241669, 1.553772, -0.3691012, 2.8724586 };
 
-            double[] varianceOLS = new double[] { 0.01178342, 0.00015513, 0.00564040, 0.00119503, 0.00521226 };
+            double[] varianceOls = new double[] { 0.01178342, 0.00015513, 0.00564040, 0.00119503, 0.00521226 };
             double[] varianceHC0 = new double[] { 0.01091862, 0.00014569, 0.00437145, 0.00120774, 0.00297996 };
             double[] varianceHC1 = new double[] { 0.01091922, 0.00014570, 0.00437169, 0.00120781, 0.00298013 };
 
-            double[] standardErrorsOLS = varianceOLS.Select(Math.Sqrt).ToArray();
+            double[] standardErrorsOls = varianceOls.Select(Math.Sqrt).ToArray();
             double[] standardErrorsHC0 = varianceHC0.Select(Math.Sqrt).ToArray();
             double[] standardErrorsHC1 = varianceHC1.Select(Math.Sqrt).ToArray();
             
@@ -92,17 +92,17 @@ namespace AD.Mathematics.Tests
 
             Assert.Equal(coefficients, generalized.Coefficients, comparer);
 
-            Assert.Equal(varianceOLS, generalized.VarianceOLS, comparer);
+            Assert.Equal(varianceOls, generalized.VarianceOls, comparer);
             Assert.Equal(varianceHC0, generalized.VarianceHC0, comparer);
             Assert.Equal(varianceHC1, generalized.VarianceHC1, comparer);
 
-            Assert.Equal(standardErrorsOLS, generalized.StandardErrorsOLS, comparer);
+            Assert.Equal(standardErrorsOls, generalized.StandardErrorsOls, comparer);
             Assert.Equal(standardErrorsHC0, generalized.StandardErrorsHC0, comparer);
             Assert.Equal(standardErrorsHC1, generalized.StandardErrorsHC1, comparer);
         }
 
         [Fact]
-        public static void Test1()
+        public static void GlmPoissonTest()
         {
             UnitTestEqualityComparer comparer = new UnitTestEqualityComparer(8);
 
@@ -134,11 +134,11 @@ namespace AD.Mathematics.Tests
 
             double[] coefficients = new double[] { 14.34011355,  -0.77265135,   0.18003745,  -0.87616156,  -0.07842665 };
             
-            double[] varianceOLS = new double[] { 2.47622006e-08, 4.80378670e-10, 5.14379692e-08, 5.98550930e-08, 1.97414603e-07 };
+            double[] varianceOls = new double[] { 2.47622006e-08, 4.80378670e-10, 5.14379692e-08, 5.98550930e-08, 1.97414603e-07 };
             double[] varianceHC0 = new double[] { 0.01842182,  0.00027302,  0.0054894 ,  0.00458959,  0.00451205 };
             double[] varianceHC1 = new double[] { 0.01842182,  0.00027302,  0.0054894 ,  0.00458959,  0.00451205 };
 
-            double[] standardErrorsOLS = varianceOLS.Select(Math.Sqrt).ToArray();
+            double[] standardErrorsOls = varianceOls.Select(Math.Sqrt).ToArray();
             double[] standardErrorsHC0 = varianceHC0.Select(Math.Sqrt).ToArray();
             double[] standardErrorsHC1 = varianceHC1.Select(Math.Sqrt).ToArray();
 
@@ -148,11 +148,11 @@ namespace AD.Mathematics.Tests
 
             Assert.Equal(coefficients, generalized.Coefficients, comparer);
 
-            Assert.Equal(varianceOLS, generalized.VarianceOLS, comparer);
+            Assert.Equal(varianceOls, generalized.VarianceOls, comparer);
             Assert.Equal(varianceHC0, generalized.VarianceHC0, comparer);
             Assert.Equal(varianceHC1, generalized.VarianceHC1, comparer);
 
-            Assert.Equal(standardErrorsOLS, generalized.StandardErrorsOLS, comparer);
+            Assert.Equal(standardErrorsOls, generalized.StandardErrorsOls, comparer);
             Assert.Equal(standardErrorsHC0, generalized.StandardErrorsHC0, comparer);
             Assert.Equal(standardErrorsHC1, generalized.StandardErrorsHC1, comparer);
         }

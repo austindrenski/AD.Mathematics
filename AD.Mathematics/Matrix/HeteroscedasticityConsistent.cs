@@ -11,7 +11,7 @@ namespace AD.Mathematics.Matrix
         /// <summary>
         /// The default correction type in which no correction is made ≡ cov(β) = mse * (Xᵀ * X)⁻¹.
         /// </summary>
-        OLS,
+        Ols,
 
         /// <summary>
         /// (White, 1980) ≡ cov(β) = (Xᵀ * X)⁻¹ * Xᵀ * { eᵢ² } * X * (Xᵀ * X)⁻¹.

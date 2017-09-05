@@ -12,7 +12,8 @@ namespace AD.Mathematics.RegressionModels
     public static class GeneralizedLinearModel
     {
         /// <summary>
-        /// Constructs a standard Ordinary Least Squares (OLS) regression model based on a <see cref="GaussianDistribution"/> and with a constant prepended to the design array.
+        /// Constructs a standard Ordinary Least Squares (OLS) regression model based on a <see cref="GaussianDistribution"/> 
+        /// and with a constant prepended to the design array.
         /// </summary>
         /// <param name="design">
         /// The design array.
@@ -42,7 +43,8 @@ namespace AD.Mathematics.RegressionModels
         }
 
         /// <summary>
-        /// Constructs a weighted Ordinary Least Squares (OLS) regression model based on a <see cref="GaussianDistribution"/> and with a constant prepended to the design array.
+        /// Constructs a weighted Ordinary Least Squares (OLS) regression model based on a <see cref="GaussianDistribution"/> 
+        /// and with a constant prepended to the design array.
         /// </summary>
         /// <param name="design">
         /// The design array.
