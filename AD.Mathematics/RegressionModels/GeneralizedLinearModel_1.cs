@@ -161,52 +161,6 @@ namespace AD.Mathematics.RegressionModels
 
             StandardErrorsHC1 = design.StandardError(squaredErrors, HeteroscedasticityConsistent.HC1);
         }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tol"></param>
-        /// <param name="absoluteTolerance"></param>
-        /// <param name="relativeTolerance"></param>
-        /// <param name="maxIterations"></param>
-        /// <returns></returns>
-        public double[] FitIrls(double tol = 1e-15, double absoluteTolerance = 1e-15, double relativeTolerance = 0, int maxIterations = 100)
-        {
-            double[] mean = _distribution.InitialMean(_response);
-            
-            double[] linearPrediction = _distribution.Predict(mean);
-
-            double[] previousResiduals = new double[_design[0].Length];
-
-            double[] wlsResponse = new double[_weights.Length];
-
-            double[] reweights = _weights.ToArray();
-            
-            for (int i = 0; i < maxIterations; i++)
-            {              
-                reweights = _weights.Multiply(_distribution.Weight(mean));
-                               
-                wlsResponse = _distribution.LinkFunction.FirstDerivative(mean).Multiply(_response.Subtract(mean)).Add(linearPrediction);
-               
-                double[] wlsResults = _design.RegressWls(wlsResponse, reweights);
-
-                linearPrediction = _design.MatrixProduct(wlsResults);
-
-                mean = _distribution.Fit(linearPrediction);
-                
-                double[] residuals = linearPrediction.Subtract(_response);
-
-                if (RegressionIrls.CheckConvergence(previousResiduals, residuals, absoluteTolerance, relativeTolerance))
-                {
-                    break;
-                }
-
-                previousResiduals = residuals.ToArray();
-            }
-
-            return _design.RegressWls(wlsResponse, reweights);
-        }
-
 
         /// <inheritdoc />
         /// <summary>
