@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using AD.Mathematics.LinkFunctions;
+using AD.Mathematics.Matrix;
 using AD.Mathematics.SpecialFunctions;
 using JetBrains.Annotations;
 
 namespace AD.Mathematics.Distributions
 {
+    /// <inheritdoc />
     /// <summary>
     /// Represents a Poisson statistical distribution. 
     /// </summary>
@@ -31,6 +33,7 @@ namespace AD.Mathematics.Distributions
         [NotNull]
         private readonly IEnumerator<int> _largeSampleEnumerator;
 
+        /// <inheritdoc />
         /// <summary>
         /// Gets the entropy of the distribution.
         /// </summary>
@@ -40,53 +43,63 @@ namespace AD.Mathematics.Distributions
             - 1.0 / (24.0 * Mean * Mean)
             - 19.0 / (360.0 * Mean * Mean * Mean);
 
+        /// <inheritdoc />
         /// <summary>
         /// The link function that maps from the linear domains.
         /// </summary>
         public ILinkFunction LinkFunction { get; }
 
+        /// <inheritdoc />
         /// <summary>
         /// Gets the maximum of the distribution.
         /// </summary>
         public double Maximum => double.PositiveInfinity;
 
+        /// <inheritdoc />
         /// <summary>
         /// Gets the mean of the distribution.
         /// </summary>
         public double Mean { get; }
 
+        /// <inheritdoc />
         /// <summary>
         /// Gets the median of the distribution.
         /// </summary>
         public double Median => Math.Floor(Mean + 1.0 / 3.0 - 0.02 / Mean);
 
+        /// <inheritdoc />
         /// <summary>
         /// Gets the minimum of the distribution.
         /// </summary>
         public double Minimum => default(double);
 
+        /// <inheritdoc />
         /// <summary>
         /// Gets the mode of the distribution.
         /// </summary>
         public double Mode => Math.Floor(Mean);
 
+        /// <inheritdoc />
         /// <summary>
         /// Gets the skewness of the distribution.
         /// </summary>
         public double Skewness => 1.0 / StandardDeviation;
 
+        /// <inheritdoc />
         /// <summary>
         /// Gets the excess kurtosis of the distribution.
         /// </summary>
         public double Kurtosis => 1.0 / Mean;
 
+        /// <inheritdoc />
         /// <summary>
         /// Gets the standard deviation of the distribution.
         /// </summary>
         public double StandardDeviation => Math.Sqrt(Mean);
 
+        /// <inheritdoc />
         /// <summary>
-        /// Gets the varianve of the distribution.
+        /// Gets the variance of the distribution.
         /// </summary>
         public double Variance => Mean;
 
@@ -117,6 +130,7 @@ namespace AD.Mathematics.Distributions
             _largeSampleEnumerator = LargeSamples();
         }
         
+        /// <inheritdoc />
         /// <summary>
         /// The log-likelihood function.
         /// </summary>
@@ -146,12 +160,15 @@ namespace AD.Mathematics.Distributions
             {
                 double error = response[i] - meanResponse[i];
 
-                result += -0.5 * weights[i] * (error * error / scale + common);
+                result += weights[i] * (error * error / scale + common);
             }
+
+            result *= -0.5;
 
             return result;
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// Calculates the deviance for the given arguments.
         /// </summary>
@@ -196,6 +213,7 @@ namespace AD.Mathematics.Distributions
             return 2 * result;
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// Provides an initial mean response array for the Iteratively Reweighted Least Squares (IRLS) algorithm.
         /// </summary>
@@ -206,13 +224,14 @@ namespace AD.Mathematics.Distributions
         /// An initial mean response array.
         /// </returns>
         [Pure]
-        public double[] InitialMeanResponse(double[] response)
-        {
+        public double[] InitialMean(double[] response)
+        {         
             double mean = response.Average();
-
-            return response.Select(x => (x + mean) / 2).ToArray();
+            
+            return response.Select(x => (x + mean) / 2.0).ToArray();
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// Calculates the weight for a step of the Iteratively Reweighted Least Squares (IRLS) algorithm.
         /// </summary>
@@ -225,9 +244,17 @@ namespace AD.Mathematics.Distributions
         [Pure]
         public double[] Weight(double[] meanResponse)
         {
-            return LinkFunction.FirstDerivative(meanResponse).Select(x => 1.0 / (x * x)).ToArray();
+            double[] absMean =
+                meanResponse.Select(Math.Abs).ToArray();
+            
+            return
+                LinkFunction.FirstDerivative(meanResponse)
+                            .Select((x, i) => x * x * absMean[i])
+                            .Select(x => 1.0 / x)
+                            .ToArray();
         }
-
+        
+        /// <inheritdoc />
         /// <summary>
         /// Calculates a linear prediction given a mean response value.
         /// </summary>
@@ -243,6 +270,7 @@ namespace AD.Mathematics.Distributions
             return LinkFunction.Evaluate(meanResponse);
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// Calculates a mean response value given a linear prediction.
         /// </summary>
@@ -258,6 +286,7 @@ namespace AD.Mathematics.Distributions
             return LinkFunction.Inverse(linearPredicton);
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// The probability function of the distribution (e.g. PMF for discrete distributions, PDF for continuous distributions).
         /// </summary>
@@ -278,6 +307,7 @@ namespace AD.Mathematics.Distributions
             return Math.Exp(LogProbability(x));
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// The logarithm of the probability function of the distribution.
         /// </summary>
@@ -298,6 +328,7 @@ namespace AD.Mathematics.Distributions
             return (int)x * Math.Log(Mean) - Factorial.GetLog((int)x) - Mean;
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// Randomly draws a value from the distribution.
         /// </summary>
@@ -316,6 +347,7 @@ namespace AD.Mathematics.Distributions
             return _largeSampleEnumerator.Current;
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// Randomly draws the specified count of values from the distribution.
         /// </summary>
@@ -405,7 +437,8 @@ namespace AD.Mathematics.Distributions
             }
             // ReSharper disable once IteratorNeverReturns
         }
-        
+
+        /// <inheritdoc cref="IDistribution{T}.ToString" />
         /// <summary>
         /// Returns a string that represents the current distribution.
         /// </summary>

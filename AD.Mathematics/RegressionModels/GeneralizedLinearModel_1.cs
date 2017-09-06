@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using AD.Mathematics.Distributions;
@@ -18,7 +17,7 @@ namespace AD.Mathematics.RegressionModels
     public class GeneralizedLinearModel<T> : IRegressionModel
     {
         [NotNull]
-        private readonly IDistribution<T> _family;
+        private readonly IDistribution<T> _distribution;
 
         [NotNull]
         [ItemNotNull]
@@ -120,10 +119,10 @@ namespace AD.Mathematics.RegressionModels
         /// <param name="weights">
         /// An array of importance weights.
         /// </param>
-        /// <param name="family">
+        /// <param name="distribution">
         /// The distribution class used by the model.
         /// </param>
-        public GeneralizedLinearModel([NotNull][ItemNotNull] double[][] design, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution<T> family)
+        public GeneralizedLinearModel([NotNull][ItemNotNull] double[][] design, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution<T> distribution)
         {
             if (design is null)
             {
@@ -133,25 +132,24 @@ namespace AD.Mathematics.RegressionModels
             {
                 throw new ArgumentNullException(nameof(response));
             }
-            if (family is null)
+            if (distribution is null)
             {
-                throw new ArgumentNullException(nameof(family));
+                throw new ArgumentNullException(nameof(distribution));
             }
             if (design.Length != response.Length || design.Length == 0)
             {
                 throw new ArrayConformabilityException<double>(design, response);
             }
 
-            _family = family;
+            _distribution = distribution;
             _design = design;
             _response = response;
             _weights = weights;
 
             Coefficients =
-                _family is GaussianDistribution && _family.LinkFunction is IdentityLinkFunction
+                _distribution is GaussianDistribution && _distribution.LinkFunction is IdentityLinkFunction
                     ? design.RegressOls(response)
-//                    : design.RegressIrls(response);
-                    : FitIrls();
+                    : design.RegressIrls(response, weights, distribution);
             
             double[] squaredErrors = design.SquaredError(response, Evaluate);
             
@@ -164,57 +162,41 @@ namespace AD.Mathematics.RegressionModels
             StandardErrorsHC1 = design.StandardError(squaredErrors, HeteroscedasticityConsistent.HC1);
         }
         
-       /// <summary>
-       /// 
-       /// </summary>
-       /// <param name="tol"></param>
-       /// <param name="absoluteTolerance"></param>
-       /// <param name="relativeTolerance"></param>
-       /// <param name="tolCriterion"></param>
-       /// <param name="maxIterations"></param>
-       /// <param name="initial"></param>
-       /// <returns></returns>
-       public double[] FitIrls(double tol = 1e-15, double absoluteTolerance = 1e-15, double relativeTolerance = 0, double tolCriterion = 1e-15, int maxIterations = 100, double[] initial = null)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tol"></param>
+        /// <param name="absoluteTolerance"></param>
+        /// <param name="relativeTolerance"></param>
+        /// <param name="maxIterations"></param>
+        /// <returns></returns>
+        public double[] FitIrls(double tol = 1e-15, double absoluteTolerance = 1e-15, double relativeTolerance = 0, int maxIterations = 100)
         {
-            double[] meanResponse;
-            double[] linearPrediction;
-
-            if (initial is null)
-            {
-                meanResponse = _family.Fit(_response).ToArray();
-                linearPrediction = _family.Predict(meanResponse.ToArray());
-            }
-            else
-            {
-                linearPrediction = _design.MatrixProduct(initial); // + self.offset_exposure
-                meanResponse = _family.Fit(linearPrediction).ToArray();
-            }
-
-            double deviance = _family.Deviance(_response, meanResponse, _weights);
+            double[] mean = _distribution.InitialMean(_response);
+            
+            double[] linearPrediction = _distribution.Predict(mean);
 
             double[] previousResiduals = new double[_design[0].Length];
 
             double[] wlsResponse = new double[_weights.Length];
 
-            double[] weights = Enumerable.Repeat(1.0, _weights.Length).ToArray();
+            double[] reweights = _weights.ToArray();
             
             for (int i = 0; i < maxIterations; i++)
-            {
-                weights = weights.Multiply(_family.Weight(meanResponse));
-                
-                Debug.WriteLine(string.Join(", ", weights));
-                
-                wlsResponse = _family.LinkFunction.FirstDerivative(meanResponse).Multiply(_response.Subtract(meanResponse)).Add(linearPrediction);
+            {              
+                reweights = _weights.Multiply(_distribution.Weight(mean));
+                               
+                wlsResponse = _distribution.LinkFunction.FirstDerivative(mean).Multiply(_response.Subtract(mean)).Add(linearPrediction);
                
-                double[] wlsResults = _design.RegressWls(wlsResponse, weights);
+                double[] wlsResults = _design.RegressWls(wlsResponse, reweights);
 
-                double[] residuals = _response.Subtract(_design.MatrixProduct(wlsResults));
+                linearPrediction = _design.MatrixProduct(wlsResults);
 
-                linearPrediction = _design.MatrixProduct(wlsResults); // + self.offset_exposure
-
-                meanResponse = _family.Fit(linearPrediction);
+                mean = _distribution.Fit(linearPrediction);
                 
-                if (CheckConvergence(previousResiduals, residuals, absoluteTolerance, relativeTolerance))
+                double[] residuals = linearPrediction.Subtract(_response);
+
+                if (RegressionIrls.CheckConvergence(previousResiduals, residuals, absoluteTolerance, relativeTolerance))
                 {
                     break;
                 }
@@ -222,7 +204,7 @@ namespace AD.Mathematics.RegressionModels
                 previousResiduals = residuals.ToArray();
             }
 
-            return _design.RegressWls(wlsResponse, weights);
+            return _design.RegressWls(wlsResponse, reweights);
         }
 
 
@@ -239,14 +221,14 @@ namespace AD.Mathematics.RegressionModels
         /// <param name="weights">
         /// An array of importance weights.
         /// </param>
-        /// <param name="family">
+        /// <param name="distribution">
         /// The distribution class used by the model.
         /// </param>
         /// <param name="constant">
         /// The constant used by the model to prepend the design matrix.
         /// </param>
-        public GeneralizedLinearModel([NotNull][ItemNotNull] double[][] independent, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution<T> family, double constant)
-            : this(independent.Prepend(constant), response, weights, family)
+        public GeneralizedLinearModel([NotNull][ItemNotNull] double[][] independent, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution<T> distribution, double constant)
+            : this(independent.Prepend(constant), response, weights, distribution)
         {
         }
 
@@ -293,7 +275,7 @@ namespace AD.Mathematics.RegressionModels
         {
             double[] linearPrediction = _design.MatrixProduct(response); // + self.offset_exposure
 
-            double[] meanResponse = _family.LinkFunction.Inverse(linearPrediction);
+            double[] mean = _distribution.LinkFunction.Inverse(linearPrediction);
 
             if (scale is 1.0)
             {
@@ -301,7 +283,7 @@ namespace AD.Mathematics.RegressionModels
                 // Python: self.estimate_scale(expval)
             }
 
-            return _family.LogLikelihood(response, meanResponse, _weights, scale);
+            return _distribution.LogLikelihood(response, mean, _weights, scale);
         }
 
         /// <summary>
@@ -327,36 +309,6 @@ namespace AD.Mathematics.RegressionModels
             }
 
             return stringBuilder.ToString();
-        }
-
-        /// <summary>
-        /// Private helper method to check whether two vectors are sufficiently close to indicate convergence.
-        /// </summary>
-        /// <param name="a">
-        /// The first vector.
-        /// </param>
-        /// <param name="b">
-        /// The second vector.
-        /// </param>
-        /// <param name="absoluteTolerance">
-        /// The absolute tolerance for convergence.
-        /// </param>
-        /// <param name="relativeTolerance">
-        /// The relative tolerance among the calues for convergence.
-        /// </param>
-        /// <returns>
-        /// True if convergence is likely; otherwise false.
-        /// </returns>
-        private bool CheckConvergence(double[] a, double[] b, double absoluteTolerance, double relativeTolerance)
-        {
-            for (int i = 0; i < a.Length; i++)
-            {
-                if (Math.Abs(a[i] - b[i]) > absoluteTolerance + relativeTolerance * Math.Abs(b[i]))
-                {
-                    return false;
-                }
-            }
-            return true;
         }
     }
 }

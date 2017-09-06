@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 
 namespace AD.Mathematics.LinkFunctions
 {
+    /// <inheritdoc />
     /// <summary>
     /// Represents the log link function where the argument represents a probability and the result is the logarithm of the odds.
     /// </summary>
@@ -38,6 +39,7 @@ namespace AD.Mathematics.LinkFunctions
             Intercept = intercept;
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// The log link function.
         /// </summary>
@@ -56,6 +58,7 @@ namespace AD.Mathematics.LinkFunctions
             return x.Select(Check).Select(y => Math.Log(y)).ToArray();
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// The inverse of the log link function.
         /// </summary>
@@ -74,6 +77,7 @@ namespace AD.Mathematics.LinkFunctions
             return x.Select(Math.Exp).ToArray();
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// Evaluates the first derivative of the link function given the argument.
         /// </summary>
@@ -88,6 +92,7 @@ namespace AD.Mathematics.LinkFunctions
             return x.Select(Check).Select(y => 1.0 / y).ToArray();
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// Evaluates the second derivative of the link function given the argument.
         /// </summary>

@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using AD.Mathematics.LinkFunctions;
 using JetBrains.Annotations;
 
 namespace AD.Mathematics.Distributions
 {
     /// <summary>
-    /// Represents a statistical distribution
+    /// Represents a statistical distribution.
     /// </summary>
     [PublicAPI]
-    public interface IDistribution<out T>
+    public interface IDistribution
     {
         /// <summary>
         /// The link function that maps from the linear domains.
@@ -62,21 +63,75 @@ namespace AD.Mathematics.Distributions
         double StandardDeviation { get; }
 
         /// <summary>
-        /// Gets the varianve of the distribution.
+        /// Gets the variance of the distribution.
         /// </summary>
         double Variance { get; }
 
         /// <summary>
-        /// The probability function of the distribution (e.g. PMF for discrete distributions, PDF for continuous distributions).
+        /// Calculates the deviance for the given arguments.
         /// </summary>
-        /// <param name="x">
-        /// The domain location at which the probability is evaluated.
+        /// <param name="response">
+        /// An array of response values.
+        /// </param>
+        /// <param name="mean">
+        /// An array of mean values.
+        /// </param>
+        /// <param name="weights">
+        /// An array of importance weights.
+        /// </param>
+        /// <param name="scale">
+        /// An option scaling value.
         /// </param>
         /// <returns>
-        /// The probability at the given location.
+        /// The deviance function evaluated with the given inputs.
+        /// </returns>
+        double Deviance([NotNull] IReadOnlyList<double> response, [NotNull] IReadOnlyList<double> mean, [NotNull] IReadOnlyList<double> weights, double scale = 1.0);
+
+        /// <summary>
+        /// Calculates a mean value given a linear prediction.
+        /// </summary>
+        /// <param name="linearPredicton">
+        /// A linear predicton.
+        /// </param>
+        /// <returns>
+        /// A mean value.
         /// </returns>
         [Pure]
-        double Probability(double x);
+        double[] Fit(double[] linearPredicton);
+
+        /// <summary>
+        /// Provides an initial mean array for the Iteratively Reweighted Least Squares (IRLS) algorithm.
+        /// </summary>
+        /// <param name="response">
+        /// An untransformed response array.
+        /// </param>
+        /// <returns>
+        /// An initial mean array.
+        /// </returns>
+        [Pure]
+        [NotNull]
+        double[] InitialMean([NotNull] double[] response);
+        
+        /// <summary>
+        /// The log-likelihood function.
+        /// </summary>
+        /// <param name="response">
+        /// An array of response values.
+        /// </param>
+        /// <param name="mean">
+        /// An array of fitted mean values.
+        /// </param>
+        /// <param name="weights">
+        /// An optional array of importance weights.
+        /// </param>
+        /// <param name="scale">
+        /// An optional value that scales the log-likelihood function.
+        /// </param>
+        /// <returns>
+        /// The value of the log-likelihood function evaluated with the given inputs.
+        /// </returns>
+        [Pure]
+        double LogLikelihood([NotNull] IReadOnlyList<double> response, [NotNull] IReadOnlyList<double> mean, [NotNull] IReadOnlyList<double> weights, double scale = 1.0);
 
         /// <summary>
         /// The logarithm of the probability function of the distribution.
@@ -89,120 +144,43 @@ namespace AD.Mathematics.Distributions
         /// </returns>
         [Pure]
         double LogProbability(double x);
-
+        
         /// <summary>
-        /// The log-likelihood function.
+        /// Calculates a linear prediction given a mean value.
         /// </summary>
-        /// <param name="response">
-        /// An array of response values.
-        /// </param>
-        /// <param name="meanResponse">
-        /// An array of fitted mean response values.
-        /// </param>
-        /// <param name="weights">
-        /// An optional array of importance weights.
-        /// </param>
-        /// <param name="scale">
-        /// An optional value that scales the log-likelihood function.
-        /// </param>
-        /// <returns>
-        /// The value of the log-likelihood function evaluated with the given inputs.
-        /// </returns>
-        [Pure]
-        double LogLikelihood([NotNull] IReadOnlyList<double> response, [NotNull] IReadOnlyList<double> meanResponse, [NotNull] IReadOnlyList<double> weights, double scale = 1.0);
-
-        /// <summary>
-        /// Calculates the deviance for the given arguments.
-        /// </summary>
-        /// <param name="response">
-        /// An array of response values.
-        /// </param>
-        /// <param name="meanResponse">
-        /// An array of mean response values.
-        /// </param>
-        /// <param name="weights">
-        /// An array of importance weights.
-        /// </param>
-        /// <param name="scale">
-        /// An option scaling value.
-        /// </param>
-        /// <returns>
-        /// The deviance function evaluated with the given inputs.
-        /// </returns>
-        double Deviance([NotNull] IReadOnlyList<double> response, [NotNull] IReadOnlyList<double> meanResponse, [NotNull] IReadOnlyList<double> weights, double scale = 1.0);
-
-        /// <summary>
-        /// Calculates a linear prediction given a mean response value.
-        /// </summary>
-        /// <param name="meanResponse">
-        /// A mean response value.
+        /// <param name="mean">
+        /// A mean value.
         /// </param>
         /// <returns>
         /// A linear prediction value.
         /// </returns>
         [Pure]
-        double[] Predict(double[] meanResponse);
-
+        double[] Predict(double[] mean);
+        
         /// <summary>
-        /// Calculates a mean response value given a linear prediction.
+        /// The probability function of the distribution (e.g. PMF for discrete distributions, PDF for continuous distributions).
         /// </summary>
-        /// <param name="linearPredicton">
-        /// A linear predicton.
+        /// <param name="x">
+        /// The domain location at which the probability is evaluated.
         /// </param>
         /// <returns>
-        /// A mean response value.
+        /// The probability at the given location.
         /// </returns>
         [Pure]
-        double[] Fit(double[] linearPredicton);
-
+        double Probability(double x);
+        
         /// <summary>
         /// Calculates the weight for a step of the Iteratively Reweighted Least Squares (IRLS) algorithm.
         /// </summary>
-        /// <param name="meanResponse">
-        /// A mean response value.
+        /// <param name="mean">
+        /// A mean value.
         /// </param>
         /// <returns>
-        /// A weight based on the mean response.
+        /// A weight based on the mean.
         /// </returns>
         [Pure]
-        double[] Weight(double[] meanResponse);
-
-        /// <summary>
-        /// Provides an initial mean response array for the Iteratively Reweighted Least Squares (IRLS) algorithm.
-        /// </summary>
-        /// <param name="response">
-        /// An untransformed response array.
-        /// </param>
-        /// <returns>
-        /// An initial mean response array.
-        /// </returns>
-        [Pure]
-        [NotNull]
-        double[] InitialMeanResponse([NotNull] double[] response);
-
-        /// <summary>
-        /// Randomly draws a value from the distribution.
-        /// </summary>
-        /// <returns>
-        /// A randomly drawn value from the distribution.
-        /// </returns>
-        [NotNull]
-        T Draw();
-
-        /// <summary>
-        /// Randomly draws the specified count of values from the distribution.
-        /// </summary>
-
-        /// <param name="count">
-        /// The number of random draws to make.
-        /// </param>
-        /// <returns>
-        /// An enumerable collection of randomly drawn values from the distribution.
-        /// </returns>
-        [NotNull]
-        [ItemNotNull]
-        IEnumerable<T> Draw(int count);
-
+        double[] Weight(double[] mean);
+        
         /// <summary>
         /// Returns a string that represents the current distribution.
         /// </summary>

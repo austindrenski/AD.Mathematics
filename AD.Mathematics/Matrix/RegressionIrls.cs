@@ -1,4 +1,7 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using System.Linq;
+using AD.Mathematics.Distributions;
+using JetBrains.Annotations;
 
 namespace AD.Mathematics.Matrix
 {
@@ -13,90 +16,93 @@ namespace AD.Mathematics.Matrix
         /// </summary>
         /// <param name="design"></param>
         /// <param name="response"></param>
+        /// <param name="weights"></param>
+        /// <param name="distribution"></param>
+        /// <param name="maxIterations"></param>
+        /// <param name="absoluteTolerance"></param>
+        /// <param name="relativeTolerance"></param>
         /// <returns></returns>
-        public static double[] RegressIrls([NotNull] [ItemNotNull] this double[][] design, [NotNull] double[] response)
+        public static double[] RegressIrls([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution distribution, int maxIterations = int.MaxValue, double absoluteTolerance = 1e-15, double relativeTolerance = 0)
         {
-            // 
-            // Input: A, b, x_1, k=1
-            // while not meeting the stopping criterion do
-            // {
-            //     UpdateW: W_k_i = |x_k_i|^-1 for all W_k_i
-            //     Update x: x_(k+1) = (W_k)^-1 * A_t * (A * W_k^-1 * A_t)^-1 * b
-            //     Update k = k + 1
-            // }
-            return new double[design[0].Length];
-            //def _fit_irls(self, start_params=None, maxiter=100, tol=1e-8,
-            //              scale=None, cov_type='nonrobust', cov_kwds=None,
-            //              use_t=None, **kwargs):
-            //    """
-            //    Fits a generalized linear model for a given family using
-            //    iteratively reweighted least squares (IRLS).
-            //    """
-            //    atol = kwargs.get('atol')
-            //    rtol = kwargs.get('rtol', 0.)
-            //    tol_criterion = kwargs.get('tol_criterion', 'deviance')
-            //    atol = tol if atol is None else atol
+            if (response is null)
+            {
+                throw new ArgumentNullException(nameof(response));
+            }
+            if (design is null)
+            {
+                throw new ArgumentNullException(nameof(design));
+            }            
+            if (weights is null)
+            {
+                throw new ArgumentNullException(nameof(weights));
+            }
+            
+            double[] mean = distribution.InitialMean(response);
+            
+            double[] linearPrediction = distribution.Predict(mean);
 
-            //    endog = self.endog
-            //    wlsexog = self.exog
-            //    if start_params is None:
-            //        start_params = np.zeros(self.exog.shape[1], np.float)
-            //        mu = self.family.starting_mu(self.endog)
-            //        lin_pred = self.family.predict(mu)
-            //    else:
-            //        lin_pred = np.dot(wlsexog, start_params) + self._offset_exposure
-            //        mu = self.family.fitted(lin_pred)
-            //    dev = self.family.deviance(self.endog, mu, self.iweights)
-            //    if np.isnan(dev):
-            //        raise ValueError("The first guess on the deviance function "
-            //                         "returned a nan.  This could be a boundary "
-            //                         " problem and should be reported.")
+            double[] previousResiduals = new double[design[0].Length];
 
-            //    # first guess on the deviance is assumed to be scaled by 1.
-            //    # params are none to start, so they line up with the deviance
-            //    history = dict(params=[np.inf, start_params], deviance=[np.inf, dev])
-            //    converged = False
-            //    criterion = history[tol_criterion]
-            //    # This special case is used to get the likelihood for a specific
-            //    # params vector.
-            //    if maxiter == 0:
-            //        mu = self.family.fitted(lin_pred)
-            //        self.scale = self.estimate_scale(mu)
-            //        wls_results = lm.RegressionResults(self, start_params, None)
-            //        iteration = 0
-            //    for iteration in range(maxiter):
-            //        self.weights = (self.iweights * self.n_trials *
-            //                        self.family.weights(mu))
-            //        wlsendog = (lin_pred + self.family.link.deriv(mu) * (self.endog-mu)
-            //                    - self._offset_exposure)
-            //        wls_results = reg_tools._MinimalWLS(wlsendog, wlsexog, self.weights).fit(method='lstsq')
-            //        lin_pred = np.dot(self.exog, wls_results.params) + self._offset_exposure
-            //        mu = self.family.fitted(lin_pred)
-            //        history = self._update_history(wls_results, mu, history)
-            //        self.scale = self.estimate_scale(mu)
-            //        if endog.squeeze().ndim == 1 and np.allclose(mu - endog, 0):
-            //            msg = "Perfect separation detected, results not available"
-            //            raise PerfectSeparationError(msg)
-            //        converged = _check_convergence(criterion, iteration + 1, atol,
-            //                                       rtol)
-            //        if converged:
-            //            break
-            //    self.mu = mu
+            double[] wlsResponse = new double[weights.Length];
 
-            //    if maxiter > 0:  # Only if iterative used
-            //        wls_results = lm.WLS(wlsendog, wlsexog, self.weights).fit()
+            double[] reweights = weights.ToArray();
+            
+            for (int i = 0; i < maxIterations; i++)
+            {              
+                reweights = weights.Multiply(distribution.Weight(mean));
+                               
+                wlsResponse = distribution.LinkFunction.FirstDerivative(mean).Multiply(response.Subtract(mean)).Add(linearPrediction);
+               
+                double[] wlsResults = design.RegressWls(wlsResponse, reweights);
 
-            //    glm_results = GLMResults(self, wls_results.params,
-            //                             wls_results.normalized_cov_params,
-            //                             self.scale,
-            //                             cov_type=cov_type, cov_kwds=cov_kwds,
-            //                             use_t=use_t)
+                linearPrediction = design.MatrixProduct(wlsResults);
+                
+                mean = distribution.Fit(linearPrediction);
 
-            //    glm_results.method = "IRLS"
-            //    history['iteration'] = iteration + 1
-            //    glm_results.fit_history = history
-            //    glm_results.converged = converged
-            //    return GLMResultsWrapper(glm_results)
+                double[] residuals = linearPrediction.Subtract(response);
+                
+                if (CheckConvergence(previousResiduals, residuals, absoluteTolerance, relativeTolerance))
+                {
+                    break;
+                }
+
+                previousResiduals = residuals.ToArray();
+            }
+
+            return design.RegressWls(wlsResponse, reweights);
+        }
+        
+        /// <summary>
+        /// Private helper method to check whether two vectors are sufficiently close to indicate convergence.
+        /// </summary>
+        /// <param name="a">
+        /// The first vector.
+        /// </param>
+        /// <param name="b">
+        /// The second vector.
+        /// </param>
+        /// <param name="absoluteTolerance">
+        /// The absolute tolerance for convergence.
+        /// </param>
+        /// <param name="relativeTolerance">
+        /// The relative tolerance among the calues for convergence.
+        /// </param>
+        /// <returns>
+        /// True if convergence is likely; otherwise false.
+        /// </returns>
+        internal static bool CheckConvergence(double[] a, double[] b, double absoluteTolerance, double relativeTolerance)
+        {
+            double tolerance = absoluteTolerance + relativeTolerance;
+            
+            for (int i = 0; i < a.Length; i++)
+            {
+                if (Math.Abs(a[i] - b[i]) >  Math.Abs(b[i]) * tolerance)
+                {
+                    return false;
+                }
+            }
+            
+            return true;
         }
     }
 }
