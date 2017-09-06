@@ -102,11 +102,6 @@ namespace AD.Mathematics.LinkFunctions
             return x.Select(Check).Select(y => -1.0 / (y * y)).ToArray();
         }
 
-        public double[] InverseDerivative(double[] x)
-        {
-            return x.Select(Math.Exp).ToArray();
-        }
-
         private static double Check(double x)
         {
             return double.Epsilon < x ? x : double.Epsilon;

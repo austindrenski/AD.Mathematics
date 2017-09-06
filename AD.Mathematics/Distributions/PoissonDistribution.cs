@@ -7,6 +7,9 @@ using JetBrains.Annotations;
 
 namespace AD.Mathematics.Distributions
 {
+    /// <summary>
+    /// Represents a Poisson statistical distribution. 
+    /// </summary>
     [PublicAPI]
     public class PoissonDistribution : IDistribution<int>
     {

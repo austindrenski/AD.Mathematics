@@ -6,6 +6,9 @@ using JetBrains.Annotations;
 
 namespace AD.Mathematics.Distributions
 {
+    /// <summary>
+    /// Represents a Gaussian statistical distribution.
+    /// </summary>
     [PublicAPI]
     public class GaussianDistribution : IDistribution<double>
     {

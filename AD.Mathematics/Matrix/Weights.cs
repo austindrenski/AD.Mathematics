@@ -23,20 +23,13 @@ namespace AD.Mathematics.Matrix
                 throw new ArgumentException($"Conformability error: {nameof(a)}[{a.Length}], {nameof(weights)}[{a.Length}]");
             }
 
-            double[] squareRootOfWeights = new double[weights.Length];
-
-            for (int i = 0; i < squareRootOfWeights.Length; i++)
-            {
-                squareRootOfWeights[i] = Math.Sqrt(weights[i]);
-            }
-
             double[] result = new double[a.Length];
 
             Array.Copy(a, result, result.Length);
 
             for (int i = 0; i < result.Length; i++)
             {
-                result[i] *= squareRootOfWeights[i];
+                result[i] *= Math.Sqrt(weights[i]);
             }
 
             return result;
@@ -60,13 +53,6 @@ namespace AD.Mathematics.Matrix
                 throw new ArgumentException($"Conformability error: {nameof(a)}[{a.Length}][{a[0].Length}], {nameof(weights)}[{weights.Length}]");
             }
 
-            double[] squareRootOfWeights = new double[weights.Length];
-
-            for (int i = 0; i < squareRootOfWeights.Length; i++)
-            {
-                squareRootOfWeights[i] = Math.Sqrt(weights[i]);
-            }
-
             double[][] result = new double[a.Length][];
 
             for (int i = 0; i < result.Length; i++)
@@ -77,7 +63,7 @@ namespace AD.Mathematics.Matrix
 
                 for (int j = 0; j < result[0].Length; j++)
                 {
-                    result[i][j] *= squareRootOfWeights[i];
+                    result[i][j] *= Math.Sqrt(weights[i]);
                 }
 
             }

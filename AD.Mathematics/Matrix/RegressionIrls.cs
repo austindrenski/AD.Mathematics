@@ -5,6 +5,7 @@ namespace AD.Mathematics.Matrix
     /// <summary>
     /// 
     /// </summary>
+    [PublicAPI]
     public static class RegressionIrls
     {
         /// <summary>

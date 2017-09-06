@@ -2,9 +2,17 @@
 
 namespace AD.Mathematics.Matrix
 {
+    /// <summary>
+    /// Extension methods to separate a lwoer and upper matrix from a combined representation of the two.
+    /// </summary>
     [PublicAPI]
     public static class SeparationLu
     {
+        /// <summary>
+        /// Separates the lower and upper matrices from the combined representation.
+        /// </summary>
+        /// <param name="lowerUpperResult"></param>
+        /// <returns></returns>
         public static (double[][] Lower, double[][] Upper) SeparateLu(this (double[][] LowerUpper, int[] Permutation, int RowSwap) lowerUpperResult)
         {
             double[][] result = lowerUpperResult.LowerUpper.CloneArray();
