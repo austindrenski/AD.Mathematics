@@ -1,6 +1,6 @@
 ﻿namespace AD.Mathematics.Tests
 {
-    public class Observation
+    public class GravityCourseObservation
     {
         public string Importer { get; set; }
 

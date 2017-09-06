@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using AD.Mathematics.Distributions;
@@ -149,8 +150,9 @@ namespace AD.Mathematics.RegressionModels
             Coefficients =
                 _family is GaussianDistribution && _family.LinkFunction is IdentityLinkFunction
                     ? design.RegressOls(response)
-                    : design.RegressIrls(response);
-
+//                    : design.RegressIrls(response);
+                    : FitIrls();
+            
             double[] squaredErrors = design.SquaredError(response, Evaluate);
             
             SumSquaredErrors = squaredErrors.Sum();
@@ -161,6 +163,68 @@ namespace AD.Mathematics.RegressionModels
 
             StandardErrorsHC1 = design.StandardError(squaredErrors, HeteroscedasticityConsistent.HC1);
         }
+        
+       /// <summary>
+       /// 
+       /// </summary>
+       /// <param name="tol"></param>
+       /// <param name="absoluteTolerance"></param>
+       /// <param name="relativeTolerance"></param>
+       /// <param name="tolCriterion"></param>
+       /// <param name="maxIterations"></param>
+       /// <param name="initial"></param>
+       /// <returns></returns>
+       public double[] FitIrls(double tol = 1e-15, double absoluteTolerance = 1e-15, double relativeTolerance = 0, double tolCriterion = 1e-15, int maxIterations = 100, double[] initial = null)
+        {
+            double[] meanResponse;
+            double[] linearPrediction;
+
+            if (initial is null)
+            {
+                meanResponse = _family.Fit(_response).ToArray();
+                linearPrediction = _family.Predict(meanResponse.ToArray());
+            }
+            else
+            {
+                linearPrediction = _design.MatrixProduct(initial); // + self.offset_exposure
+                meanResponse = _family.Fit(linearPrediction).ToArray();
+            }
+
+            double deviance = _family.Deviance(_response, meanResponse, _weights);
+
+            double[] previousResiduals = new double[_design[0].Length];
+
+            double[] wlsResponse = new double[_weights.Length];
+
+            double[] weights = Enumerable.Repeat(1.0, _weights.Length).ToArray();
+            
+            for (int i = 0; i < maxIterations; i++)
+            {
+                weights = weights.Multiply(_family.Weight(meanResponse));
+                
+                Debug.WriteLine(string.Join(", ", weights));
+                
+                wlsResponse = _family.LinkFunction.FirstDerivative(meanResponse).Multiply(_response.Subtract(meanResponse)).Add(linearPrediction);
+               
+                double[] wlsResults = _design.RegressWls(wlsResponse, weights);
+
+                double[] residuals = _response.Subtract(_design.MatrixProduct(wlsResults));
+
+                linearPrediction = _design.MatrixProduct(wlsResults); // + self.offset_exposure
+
+                meanResponse = _family.Fit(linearPrediction);
+                
+                if (CheckConvergence(previousResiduals, residuals, absoluteTolerance, relativeTolerance))
+                {
+                    break;
+                }
+
+                previousResiduals = residuals.ToArray();
+            }
+
+            return _design.RegressWls(wlsResponse, weights);
+        }
+
 
         /// <inheritdoc />
         /// <summary>

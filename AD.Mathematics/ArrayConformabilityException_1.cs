@@ -12,30 +12,57 @@ namespace AD.Mathematics
     [PublicAPI]
     public class ArrayConformabilityException<T> : RankException
     {
+        /// <summary>
+        /// Constructs an exception resulting from dimensonal mismatch.
+        /// </summary>
         public ArrayConformabilityException(T[] a, T[] b)
             : base($"Conformability: {Format(nameof(a), a)}, {Format(nameof(b), b)},") { }
 
+        /// <summary>
+        /// Constructs an exception resulting from dimensonal mismatch.
+        /// </summary>
         public ArrayConformabilityException(T[] a, T[][] b)
             : base($"Conformability: {Format(nameof(a), a)}, {Format(nameof(b), b)},") { }
 
+        /// <summary>
+        /// Constructs an exception resulting from dimensonal mismatch.
+        /// </summary>
         public ArrayConformabilityException(T[] a, T[][][] b)
             : base($"Conformability: {Format(nameof(a), a)}, {Format(nameof(b), b)},") { }
 
+        /// <summary>
+        /// Constructs an exception resulting from dimensonal mismatch.
+        /// </summary>
         public ArrayConformabilityException(T[][] a, T[] b)
             : base($"Conformability: {Format(nameof(a), a)}, {Format(nameof(b), b)},") { }
 
+        /// <summary>
+        /// Constructs an exception resulting from dimensonal mismatch.
+        /// </summary>
         public ArrayConformabilityException(T[][] a, T[][] b)
             : base($"Conformability: {Format(nameof(a), a)}, {Format(nameof(b), b)},") { }
 
+        /// <summary>
+        /// Constructs an exception resulting from dimensonal mismatch.
+        /// </summary>
         public ArrayConformabilityException(T[][] a, T[][][] b)
             : base($"Conformability: {Format(nameof(a), a)}, {Format(nameof(b), b)},") { }
 
+        /// <summary>
+        /// Constructs an exception resulting from dimensonal mismatch.
+        /// </summary>
         public ArrayConformabilityException(T[][][] a, T[] b)
             : base($"Conformability: {Format(nameof(a), a)}, {Format(nameof(b), b)},") { }
 
+        /// <summary>
+        /// Constructs an exception resulting from dimensonal mismatch.
+        /// </summary>
         public ArrayConformabilityException(T[][][] a, T[][] b)
             : base($"Conformability: {Format(nameof(a), a)}, {Format(nameof(b), b)},") { }
 
+        /// <summary>
+        /// Constructs an exception resulting from dimensonal mismatch.
+        /// </summary>
         public ArrayConformabilityException(T[][][] a, T[][][] b)
             : base($"Conformability: {Format(nameof(a), a)}, {Format(nameof(b), b)},") { }
         

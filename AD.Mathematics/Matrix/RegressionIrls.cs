@@ -23,7 +23,7 @@ namespace AD.Mathematics.Matrix
             //     Update x: x_(k+1) = (W_k)^-1 * A_t * (A * W_k^-1 * A_t)^-1 * b
             //     Update k = k + 1
             // }
-            return response;
+            return new double[design[0].Length];
             //def _fit_irls(self, start_params=None, maxiter=100, tol=1e-8,
             //              scale=None, cov_type='nonrobust', cov_kwds=None,
             //              use_t=None, **kwargs):

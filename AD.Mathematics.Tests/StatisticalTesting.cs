@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using AD.IO;
 using AD.Mathematics.Distributions;
+using AD.Mathematics.Matrix;
 using AD.Mathematics.RegressionModels;
 using JetBrains.Annotations;
 using Xunit;
@@ -14,17 +15,21 @@ namespace AD.Mathematics.Tests
     {
         [NotNull]
         [ItemNotNull]
-        private static IReadOnlyCollection<Observation> GravityCourseData { get; }
+        private static IReadOnlyCollection<GravityCourseObservation> GravityCourseData { get; }
+        
+        [NotNull]
+        [ItemNotNull]
+        private static IReadOnlyCollection<WeightedRegressionObservation> WeightedRegressionData { get; }
 
         static StatisticalTesting()
         {
             GravityCourseData =
-                File.ReadLines("\\users\\austin.drenski\\desktop\\grav_data_course.csv")
+                File.ReadLines("\\users\\adren\\desktop\\grav_data_course.csv")
                     .SplitDelimitedLine(',')
                     .Skip(1)
                     .Select(x => x.Select(y => y.Trim()).ToArray())
                     .Select(
-                        x => new Observation
+                        x => new GravityCourseObservation
                         {
                             Importer = x[0],
                             Exporter = x[1],
@@ -37,6 +42,52 @@ namespace AD.Mathematics.Tests
                             ColonialRelationship = int.Parse(x[8])
                         })
                     .ToArray();
+
+            WeightedRegressionData =
+                File.ReadLines("\\users\\adren\\desktop\\wls_example_data.csv")
+                    .SplitDelimitedLine(',')
+                    .Skip(1)
+                    .Select(x => x.Select(y => y.Trim()).ToArray())
+                    .Select(
+                        x => new WeightedRegressionObservation
+                        {
+                            Experience = double.Parse(x[0]),
+                            Age = int.Parse(x[1]),
+                            Income = double.Parse(x[2]),
+                            OwnRent= int.Parse(x[3]) > 0,
+                            SelfEmployed = int.Parse(x[4]) > 0
+                        })
+                    .ToArray();
+        }
+
+        /// <summary>
+        /// Test the weighted least squares methods.
+        /// </summary>
+        [Fact]
+        public static void WeightedRegressionTest()
+        {
+            UnitTestEqualityComparer comparer = new UnitTestEqualityComparer(8);
+
+            double[][] input =
+                WeightedRegressionData.Select(
+                                          x => new[]
+                                          {
+                                              x.Age,
+                                              x.OwnRent ? 1 : 0,
+                                              x.Income,
+                                              x.IncomeSquared
+                                          })
+                                      .ToArray();
+
+            double[] response = WeightedRegressionData.Select(x => x.Experience).ToArray();
+
+            double[] weights = WeightedRegressionData.Select(x => x.Income).ToArray();
+
+            double[] results = input.Prepend(1).RegressWls(response, weights);
+
+            double[] coefficients = new double[] { -260.72086, -3.5707488, -3.8085199, 254.82168, -16.405243 };
+            
+            Assert.Equal(coefficients, results, comparer);
         }
 
         /// <summary>

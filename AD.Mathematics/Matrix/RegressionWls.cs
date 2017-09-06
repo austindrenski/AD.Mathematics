@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Linq;
 using JetBrains.Annotations;
 
 namespace AD.Mathematics.Matrix
@@ -19,7 +21,7 @@ namespace AD.Mathematics.Matrix
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArrayConformabilityException{T}"></exception>
         [Pure]
-        public static (double[] Results, double[] Fitted, double[] Residuals, double Scale) RegressWls([NotNull] [ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] double[] weights)
+        public static double[] RegressWls([NotNull] [ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] double[] weights)
         {
             if (design is null)
             {
@@ -38,37 +40,26 @@ namespace AD.Mathematics.Matrix
                 throw new ArrayConformabilityException<double>(design, response);
             }
 
-            double[][] x = design;
+            double[][] weightedDesign = design.CloneArray();
+            
+            double[] weightedResponse = response.ToArray();
 
-            double[][] xt = x.Transpose();
-
-            double[][] xtwtw = new double[xt.Length][];
-
-            for (int i = 0; i < xt.Length; i++)
+            double sumOfWeights = weights.Sum();
+            double[] scaledWeights = weights.Select(x => Math.Sqrt(x / sumOfWeights)).ToArray();
+            
+            for (int i = 0; i < weightedDesign.Length; i++)
             {
-                xtwtw[i] = new double[xt[i].Length];
-
-                for (int j = 0; j < xt[i].Length; j++)
+                weightedResponse[i] *= scaledWeights[i];
+                
+                for (int j = 0; j < weightedDesign[i].Length; j++)
                 {
-                    xtwtw[i][j] = weights[j] * weights[j] * xt[i][j];
+                    weightedDesign[i][j] *= scaledWeights[i] ;
                 }
             }
 
-            double[][] xtwtwxinvxt = xtwtw.MatrixProduct(x).InvertLu().MatrixProduct(xt);
+            return weightedDesign.RegressOls(weightedResponse);
 
-            double[][] xtwtwxinvxtwtw = new double[xtwtwxinvxt.Length][];
-
-            for (int i = 0; i < xt.Length; i++)
-            {
-                xtwtwxinvxtwtw[i] = new double[xtwtwxinvxt[i].Length];
-
-                for (int j = 0; j < xt[i].Length; j++)
-                {
-                    xtwtwxinvxtwtw[i][j] = weights[j] * weights[j] * xtwtwxinvxt[i][j];
-                }
-            }
-
-            return (xtwtwxinvxtwtw.MatrixProduct(response), null, null, 0);
+            //OLD
 
             //double[] rootWeights = new double[weights.Length];
             //double[] weightedResponse = new double[weights.Length];
