@@ -36,41 +36,39 @@ namespace AD.Mathematics.Matrix
                 throw new ArgumentNullException(nameof(weights));
             }
             
+            double[] oldResiduals = new double[design[0].Length];
+            double[] wlsResponse = new double[weights.Length];
+            double[] wlsWeights = new double[weights.Length];
+            
+            Array.Copy(weights, wlsWeights, wlsWeights.Length);
+            
             double[] mean = distribution.InitialMean(response);
             
-            double[] linearPrediction = distribution.Predict(mean);
-
-            double[] previousResiduals = new double[design[0].Length];
-
-            double[] wlsResponse = new double[weights.Length];
-
-            double[] reweights = new double[weights.Length];
-            
-            Array.Copy(weights, reweights, reweights.Length);
+            double[] linearCoefficients = distribution.Predict(mean);
             
             for (int i = 0; i < maxIterations; i++)
             {              
-                reweights = weights.Multiply(distribution.Weight(mean));
+                wlsWeights = weights.Multiply(distribution.Weight(mean));
                                
-                wlsResponse = distribution.LinkFunction.FirstDerivative(mean).Multiply(response.Subtract(mean)).Add(linearPrediction);
+                wlsResponse = distribution.LinkFunction.FirstDerivative(mean).Multiply(response.Subtract(mean)).Add(linearCoefficients);
                
-                double[] wlsResults = design.RegressWls(wlsResponse, reweights);
+                double[] wlsResults = design.RegressWls(wlsResponse, wlsWeights);
 
-                linearPrediction = design.MatrixProduct(wlsResults);
+                linearCoefficients = design.MatrixProduct(wlsResults);
                 
-                mean = distribution.Fit(linearPrediction);
+                mean = distribution.Fit(linearCoefficients);
 
-                double[] residuals = linearPrediction.Subtract(response);
+                double[] residuals = linearCoefficients.Subtract(response);
                 
-                if (CheckConvergence(previousResiduals, residuals, absoluteTolerance, relativeTolerance))
+                if (CheckConvergence(oldResiduals, residuals, absoluteTolerance, relativeTolerance))
                 {
                     break;
                 }
 
-                Array.Copy(residuals, previousResiduals, previousResiduals.Length);
+                Array.Copy(residuals, oldResiduals, oldResiduals.Length);
             }
 
-            return (design.RegressWls(wlsResponse, reweights), wlsResponse);
+            return (design.RegressWls(wlsResponse, wlsWeights), wlsResponse);
         }
         
         /// <summary>
