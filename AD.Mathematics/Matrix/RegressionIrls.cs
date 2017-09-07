@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using AD.Mathematics.Distributions;
 using JetBrains.Annotations;
 
@@ -45,7 +44,9 @@ namespace AD.Mathematics.Matrix
 
             double[] wlsResponse = new double[weights.Length];
 
-            double[] reweights = weights.ToArray();
+            double[] reweights = new double[weights.Length];
+            
+            Array.Copy(weights, reweights, reweights.Length);
             
             for (int i = 0; i < maxIterations; i++)
             {              
@@ -66,7 +67,7 @@ namespace AD.Mathematics.Matrix
                     break;
                 }
 
-                previousResiduals = residuals.ToArray();
+                Array.Copy(residuals, previousResiduals, previousResiduals.Length);
             }
 
             return (design.RegressWls(wlsResponse, reweights), wlsResponse);
@@ -90,13 +91,13 @@ namespace AD.Mathematics.Matrix
         /// <returns>
         /// True if convergence is likely; otherwise false.
         /// </returns>
-        internal static bool CheckConvergence(double[] a, double[] b, double absoluteTolerance, double relativeTolerance)
+        private static bool CheckConvergence(double[] a, double[] b, double absoluteTolerance, double relativeTolerance)
         {
             double tolerance = absoluteTolerance + relativeTolerance;
             
             for (int i = 0; i < a.Length; i++)
             {
-                if (Math.Abs(a[i] - b[i]) >  Math.Abs(b[i]) * tolerance)
+                if (tolerance * Math.Abs(b[i]) < Math.Abs(a[i] - b[i]))
                 {
                     return false;
                 }
