@@ -22,7 +22,7 @@ namespace AD.Mathematics.Matrix
         /// <param name="absoluteTolerance"></param>
         /// <param name="relativeTolerance"></param>
         /// <returns></returns>
-        public static double[] RegressIrls([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution distribution, int maxIterations = int.MaxValue, double absoluteTolerance = 1e-15, double relativeTolerance = 0)
+        public static double[] RegressIrls([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution distribution, int maxIterations = 100, double absoluteTolerance = 1e-15, double relativeTolerance = 0)
         {
             if (response is null)
             {

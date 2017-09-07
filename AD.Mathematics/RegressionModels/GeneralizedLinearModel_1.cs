@@ -14,38 +14,37 @@ namespace AD.Mathematics.RegressionModels
     /// Represents a generalized linear regression model.
     /// </summary>
     [PublicAPI]
-    public class GeneralizedLinearModel<T> : IRegressionModel
-    {
-        [NotNull]
-        private readonly IDistribution<T> _distribution;
-
-        [NotNull]
-        [ItemNotNull]
-        private readonly double[][] _design;
-
-        [NotNull]
-        private readonly double[] _response;
-
-        [NotNull]
-        private readonly double[] _weights;
+    public class GeneralizedLinearModel<T> : IRegressionModel<T>
+    {      
+        /// <inheritdoc />
+        /// <summary>
+        /// The distribution used to estimate the model.
+        /// </summary>
+        public IDistribution<T> Distribution { get; }
 
         /// <inheritdoc />
         /// <summary>
         /// The number of observations used to train the model ≡ N.
         /// </summary>
-        public int ObservationCount => _design.Length;
+        public int ObservationCount { get; }
 
         /// <inheritdoc />
         /// <summary>
         /// The number of variables in the model ≡ K.
         /// </summary>
-        public int VariableCount => _design[0].Length;
-
+        public int VariableCount { get; }
+        
         /// <inheritdoc />
         /// <summary>
         /// The degrees of freedom for the model ≡ df = N - K.
         /// </summary>
         public int DegreesOfFreedom => ObservationCount - Coefficients.Count;
+        
+        /// <inheritdoc />
+        /// <summary>
+        /// The coefficients calculated by the model ≡ β = (Xᵀ * X)⁻¹ * Xᵀ * y.
+        /// </summary>
+        public IReadOnlyList<double> Coefficients { get; }
 
         /// <inheritdoc />
         /// <summary>
@@ -64,12 +63,6 @@ namespace AD.Mathematics.RegressionModels
         /// The square root of the mean squared error for the model ≡ RootMSE = sqrt(MSE).
         /// </summary>
         public double RootMeanSquaredError => Math.Sqrt(MeanSquaredError);
-        
-        /// <inheritdoc />
-        /// <summary>
-        /// The coefficients calculated by the model ≡ β = (Xᵀ * X)⁻¹ * Xᵀ * y.
-        /// </summary>
-        public IReadOnlyList<double> Coefficients { get; }
 
         /// <inheritdoc />
         /// <summary>
@@ -141,13 +134,14 @@ namespace AD.Mathematics.RegressionModels
                 throw new ArrayConformabilityException<double>(design, response);
             }
 
-            _distribution = distribution;
-            _design = design;
-            _response = response;
-            _weights = weights;
+            Distribution  = distribution;
+
+            ObservationCount = design.Length;
+            
+            VariableCount = design[0].Length;
 
             Coefficients =
-                _distribution is GaussianDistribution && _distribution.LinkFunction is IdentityLinkFunction
+                distribution is GaussianDistribution && distribution.LinkFunction is IdentityLinkFunction
                     ? design.RegressOls(response)
                     : design.RegressIrls(response, weights, distribution);
             
@@ -211,33 +205,6 @@ namespace AD.Mathematics.RegressionModels
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Calculates the log-likelihood for a given <paramref name="response"/>.
-        /// </summary>
-        /// <param name="response">
-        /// The response values to test.
-        /// </param>
-        /// <param name="scale">
-        /// An optional scaling factor.
-        /// </param>
-        /// <returns>
-        /// The log-likelihood for the given response.
-        /// </returns>
-        public double LogLikelihood([NotNull] IReadOnlyList<double> response, double scale = 1.0)
-        {
-            double[] linearPrediction = _design.MatrixProduct(response); // + self.offset_exposure
-
-            double[] mean = _distribution.LinkFunction.Inverse(linearPrediction);
-
-            if (scale is 1.0)
-            {
-                // Set some scale features based on the expected value.
-                // Python: self.estimate_scale(expval)
-            }
-
-            return _distribution.LogLikelihood(response, mean, _weights, scale);
         }
 
         /// <summary>

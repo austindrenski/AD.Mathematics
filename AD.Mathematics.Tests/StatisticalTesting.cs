@@ -24,7 +24,7 @@ namespace AD.Mathematics.Tests
         static StatisticalTesting()
         {
             GravityCourseData =
-                File.ReadLines("\\users\\adren\\desktop\\grav_data_course.csv")
+                File.ReadLines("\\users\\austin.drenski\\desktop\\grav_data_course.csv")
                     .SplitDelimitedLine(',')
                     .Skip(1)
                     .Select(x => x.Select(y => y.Trim()).ToArray())
@@ -44,7 +44,7 @@ namespace AD.Mathematics.Tests
                     .ToArray();
 
             WeightedRegressionData =
-                File.ReadLines("\\users\\adren\\desktop\\wls_example_data.csv")
+                File.ReadLines("\\users\\austin.drenski\\desktop\\wls_example_data.csv")
                     .SplitDelimitedLine(',')
                     .Skip(1)
                     .Select(x => x.Select(y => y.Trim()).ToArray())
@@ -61,7 +61,7 @@ namespace AD.Mathematics.Tests
         }
 
         /// <summary>
-        /// Test the weighted least squares methods.
+        /// Test if the <see cref="RegressionWls"/> replicates a known model.
         /// </summary>
         [Fact]
         public static void WeightedRegressionTest()
@@ -91,7 +91,7 @@ namespace AD.Mathematics.Tests
         }
 
         /// <summary>
-        /// Test that the <see cref="GeneralizedLinearModel{T}"/> with a <see cref="GaussianDistribution"/> replicates a known regression.
+        /// Test if the <see cref="GeneralizedLinearModel{T}"/> with a <see cref="GaussianDistribution"/> replicates a known regression.
         /// </summary>
         [Fact]
         public static void GlmGaussianTest()
@@ -152,6 +152,9 @@ namespace AD.Mathematics.Tests
             Assert.Equal(standardErrorsHC1, generalized.StandardErrorsHC1, comparer);
         }
 
+        /// <summary>
+        /// Test if the <see cref="GeneralizedLinearModel{T}"/> with a <see cref="PoissonDistribution"/> replicates a known regression.
+        /// </summary>
         [Fact]
         public static void GlmPoissonTest()
         {

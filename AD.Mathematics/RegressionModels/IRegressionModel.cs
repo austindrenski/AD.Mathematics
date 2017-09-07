@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AD.Mathematics.Distributions;
 using JetBrains.Annotations;
 
 namespace AD.Mathematics.RegressionModels
@@ -7,8 +8,14 @@ namespace AD.Mathematics.RegressionModels
     /// Represents a regression model.
     /// </summary>
     [PublicAPI]
-    public interface IRegressionModel
+    public interface IRegressionModel<out T>
     {
+        /// <summary>
+        /// The distribution used to estimate the model.
+        /// </summary>
+        [NotNull]
+        IDistribution<T> Distribution { get; }
+        
         /// <summary>
         /// The number of observations used to train the model ≡ N.
         /// </summary>
@@ -23,6 +30,12 @@ namespace AD.Mathematics.RegressionModels
         /// The degrees of freedom for the model ≡ df = N - K.
         /// </summary>
         int DegreesOfFreedom { get; }
+        
+        /// <summary>
+        /// The coefficients calculated by the model ≡ β = (Xᵀ * X)⁻¹ * Xᵀ * y.
+        /// </summary>
+        [NotNull]
+        IReadOnlyList<double> Coefficients { get; }
 
         /// <summary>
         /// The sum of squared errors for the model ≡ SSE = Σ(Ŷᵢ - Yᵢ)².
@@ -38,12 +51,6 @@ namespace AD.Mathematics.RegressionModels
         /// The square root of the mean squared error for the model ≡ RootMSE = sqrt(MSE).
         /// </summary>
         double RootMeanSquaredError { get; }
-
-        /// <summary>
-        /// The coefficients calculated by the model ≡ β = (Xᵀ * X)⁻¹ * Xᵀ * y.
-        /// </summary>
-        [NotNull]
-        IReadOnlyList<double> Coefficients { get; }
 
         /// <summary>
         /// The standard errors for the model intercept and coefficients ≡ SE = sqrt(σ²) = sqrt(Σ(xᵢ - x̄)²).
