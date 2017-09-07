@@ -21,7 +21,7 @@ namespace AD.Mathematics.Matrix
         /// <param name="absoluteTolerance"></param>
         /// <param name="relativeTolerance"></param>
         /// <returns></returns>
-        public static (double[] Coefficients, double[] WeightedResponse) RegressIrls([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution distribution, int maxIterations = 100, double absoluteTolerance = 1e-15, double relativeTolerance = 0)
+        public static (double[] Coefficients, double[] WeightedResponse) RegressIrls([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution distribution, int maxIterations = 100, double absoluteTolerance = 1e-8, double relativeTolerance = default)
         {
             if (response is null)
             {
@@ -36,7 +36,7 @@ namespace AD.Mathematics.Matrix
                 throw new ArgumentNullException(nameof(weights));
             }
             
-            double[] oldResiduals = new double[design[0].Length];
+            double[] oldResiduals = new double[design.Length];
             double[] wlsCoefficients = new double[design[0].Length];
             double[] wlsResponse = new double[weights.Length];
             double[] wlsWeights = new double[weights.Length];
@@ -70,10 +70,12 @@ namespace AD.Mathematics.Matrix
                 double[] residuals = 
                     response.Subtract(linearResponse);
                 
-                if (!CheckConvergence(oldResiduals, residuals, absoluteTolerance, relativeTolerance))
+                if (HasConverged(residuals, oldResiduals, absoluteTolerance, relativeTolerance))
                 {
-                    Array.Copy(residuals, oldResiduals, oldResiduals.Length);
+                    break;
                 }
+
+                Array.Copy(residuals, oldResiduals, oldResiduals.Length);
             }
 
             return (wlsCoefficients, wlsResponse);
@@ -97,13 +99,13 @@ namespace AD.Mathematics.Matrix
         /// <returns>
         /// True if convergence is likely; otherwise false.
         /// </returns>
-        private static bool CheckConvergence(double[] a, double[] b, double absoluteTolerance, double relativeTolerance)
+        private static bool HasConverged(double[] a, double[] b, double absoluteTolerance, double relativeTolerance)
         {
             double tolerance = absoluteTolerance + relativeTolerance;
             
             for (int i = 0; i < a.Length; i++)
             {
-                if (tolerance * Math.Abs(b[i]) < Math.Abs(a[i] - b[i]))
+                if (tolerance * Math.Abs(a[i]) < Math.Abs(a[i] - b[i]))
                 {
                     return false;
                 }

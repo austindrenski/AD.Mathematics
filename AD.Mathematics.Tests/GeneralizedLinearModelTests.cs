@@ -130,7 +130,7 @@ namespace AD.Mathematics.Tests
                           .ToArray();
             
             GeneralizedLinearModel<int> generalized =
-                new GeneralizedLinearModel<int>(input, response, weights, new PoissonDistribution(), 1.0);          
+                new GeneralizedLinearModel<int>(input, response, weights, new PoissonDistribution(), 1.0);
             
             int n = input.Length;
             int k = input[0].Length + 1;

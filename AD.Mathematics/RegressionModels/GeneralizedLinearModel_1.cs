@@ -140,11 +140,6 @@ namespace AD.Mathematics.RegressionModels
             
             VariableCount = design[0].Length;
 
-//            Coefficients =
-//                distribution is GaussianDistribution && distribution.LinkFunction is IdentityLinkFunction
-//                    ? design.RegressOls(response)
-//                    : design.RegressIrls(response, weights, distribution);
-
             double[] squaredErrors;
             
             if (distribution is GaussianDistribution && distribution.LinkFunction is IdentityLinkFunction)
