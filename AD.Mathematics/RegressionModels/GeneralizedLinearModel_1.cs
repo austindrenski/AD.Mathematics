@@ -140,12 +140,25 @@ namespace AD.Mathematics.RegressionModels
             
             VariableCount = design[0].Length;
 
-            Coefficients =
-                distribution is GaussianDistribution && distribution.LinkFunction is IdentityLinkFunction
-                    ? design.RegressOls(response)
-                    : design.RegressIrls(response, weights, distribution);
+//            Coefficients =
+//                distribution is GaussianDistribution && distribution.LinkFunction is IdentityLinkFunction
+//                    ? design.RegressOls(response)
+//                    : design.RegressIrls(response, weights, distribution);
+
+            double[] squaredErrors;
             
-            double[] squaredErrors = design.SquaredError(response, Evaluate);
+            if (distribution is GaussianDistribution && distribution.LinkFunction is IdentityLinkFunction)
+            {
+                Coefficients = design.RegressOls(response);
+                squaredErrors = design.SquaredError(response, Evaluate);
+            }
+            else
+            {
+                (double[] coefficients, double[] weightedResponse) = design.RegressIrls(response, weights, distribution);
+
+                Coefficients = coefficients;
+                squaredErrors = design.SquaredError(weightedResponse, Evaluate);
+            }
             
             SumSquaredErrors = squaredErrors.Sum();
 
