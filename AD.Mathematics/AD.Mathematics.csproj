@@ -18,7 +18,6 @@
     <DocumentationFile>bin\Debug\netstandard2.0\AD.Mathematics.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AD.IO" Version="1.3.0" />
-    <PackageReference Include="JetBrains.Annotations" Version="11.0.0" />
+    <PackageReferencePackageReference Include="JetBrains.Annotations" Version="11.0.0" />
   </ItemGroup>
 </Project>
