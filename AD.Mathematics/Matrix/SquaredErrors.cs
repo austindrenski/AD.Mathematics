@@ -57,8 +57,8 @@ namespace AD.Mathematics.Matrix
         /// <param name="design">
         /// The design array.
         /// </param>
-        /// <param name="dependent">
-        /// The vector of dependent variable values.
+        /// <param name="response">
+        /// The vector of response values.
         /// </param>
         /// <param name="function">
         /// The function delegate to evaluate.
@@ -68,11 +68,11 @@ namespace AD.Mathematics.Matrix
         /// </returns>
         [Pure]
         [NotNull]
-        public static double[] SquaredError([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] dependent, [NotNull] Func<double[], double> function)
+        public static double[] SquaredError([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] Func<double[], double> function)
         {
-            if (dependent is null)
+            if (response is null)
             {
-                throw new ArgumentNullException(nameof(dependent));
+                throw new ArgumentNullException(nameof(response));
             }
             if (design is null)
             {
@@ -82,16 +82,16 @@ namespace AD.Mathematics.Matrix
             {
                 throw new ArgumentNullException(nameof(function));
             }
-            if (design.Length != dependent.Length)
+            if (design.Length != response.Length)
             {
-                throw new ArrayConformabilityException<double>(design, dependent);
+                throw new ArrayConformabilityException<double>(design, response);
             }
 
             double[] squaredErrors = new double[design.Length];
 
-            for (int i = 0; i < dependent.Length; i++)
+            for (int i = 0; i < response.Length; i++)
             {
-                double error = dependent[i] - function(design[i]);
+                double error = response[i] - function(design[i]);
 
                 squaredErrors[i] = error * error;
             }

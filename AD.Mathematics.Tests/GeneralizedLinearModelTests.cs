@@ -1,27 +1,22 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AD.IO;
 using AD.Mathematics.Distributions;
-using AD.Mathematics.Matrix;
 using AD.Mathematics.RegressionModels;
 using JetBrains.Annotations;
 using Xunit;
 
 namespace AD.Mathematics.Tests
 {
-    public static class StatisticalTesting
+    public static class GeneralizedLinearModelTests
     {
         [NotNull]
         [ItemNotNull]
         private static IReadOnlyCollection<GravityCourseObservation> GravityCourseData { get; }
         
-        [NotNull]
-        [ItemNotNull]
-        private static IReadOnlyCollection<WeightedRegressionObservation> WeightedRegressionData { get; }
-
-        static StatisticalTesting()
+        static GeneralizedLinearModelTests()
         {
             GravityCourseData =
                 File.ReadLines("\\users\\austin.drenski\\desktop\\grav_data_course.csv")
@@ -42,59 +37,14 @@ namespace AD.Mathematics.Tests
                             ColonialRelationship = int.Parse(x[8])
                         })
                     .ToArray();
-
-            WeightedRegressionData =
-                File.ReadLines("\\users\\austin.drenski\\desktop\\wls_example_data.csv")
-                    .SplitDelimitedLine(',')
-                    .Skip(1)
-                    .Select(x => x.Select(y => y.Trim()).ToArray())
-                    .Select(
-                        x => new WeightedRegressionObservation
-                        {
-                            Experience = double.Parse(x[0]),
-                            Age = int.Parse(x[1]),
-                            Income = double.Parse(x[2]),
-                            OwnRent= int.Parse(x[3]) > 0,
-                            SelfEmployed = int.Parse(x[4]) > 0
-                        })
-                    .ToArray();
         }
 
-        /// <summary>
-        /// Test if the <see cref="RegressionWls"/> replicates a known model.
-        /// </summary>
-        [Fact]
-        public static void WeightedRegressionTest()
-        {
-            UnitTestEqualityComparer comparer = new UnitTestEqualityComparer(8);
-
-            double[][] input =
-                WeightedRegressionData.Select(
-                                          x => new[]
-                                          {
-                                              x.Age,
-                                              x.OwnRent ? 1 : 0,
-                                              x.Income,
-                                              x.IncomeSquared
-                                          })
-                                      .ToArray();
-
-            double[] response = WeightedRegressionData.Select(x => x.Experience).ToArray();
-
-            double[] weights = WeightedRegressionData.Select(x => x.Income).ToArray();
-
-            double[] results = input.Prepend(1).RegressWls(response, weights);
-
-            double[] coefficients = new double[] { -260.72086, -3.5707488, -3.8085199, 254.82168, -16.405243 };
-            
-            Assert.Equal(coefficients, results, comparer);
-        }
-
+        
         /// <summary>
         /// Test if the <see cref="GeneralizedLinearModel{T}"/> with a <see cref="GaussianDistribution"/> replicates a known regression.
         /// </summary>
-        [Fact]
-        public static void GlmGaussianTest()
+        [Fact(DisplayName = "GLM test: Gaussian")]
+        public static void GlmGaussian0()
         {
             UnitTestEqualityComparer comparer = new UnitTestEqualityComparer(8);
 
@@ -155,8 +105,8 @@ namespace AD.Mathematics.Tests
         /// <summary>
         /// Test if the <see cref="GeneralizedLinearModel{T}"/> with a <see cref="PoissonDistribution"/> replicates a known regression.
         /// </summary>
-        [Fact]
-        public static void GlmPoissonTest()
+        [Fact(DisplayName = "GLM test: Poisson")]
+        public static void GlmPoisson0()
         {
             UnitTestEqualityComparer comparer = new UnitTestEqualityComparer(8);
 
@@ -178,10 +128,10 @@ namespace AD.Mathematics.Tests
             double[] weights =
                 Enumerable.Repeat(1.0, response.Length)
                           .ToArray();
-
+            
             GeneralizedLinearModel<int> generalized =
-                new GeneralizedLinearModel<int>(input, response, weights, new PoissonDistribution(), 1.0);
-
+                new GeneralizedLinearModel<int>(input, response, weights, new PoissonDistribution(), 1.0);          
+            
             int n = input.Length;
             int k = input[0].Length + 1;
             int df = n - k;
@@ -209,6 +159,6 @@ namespace AD.Mathematics.Tests
             Assert.Equal(standardErrorsOls, generalized.StandardErrorsOls, comparer);
             Assert.Equal(standardErrorsHC0, generalized.StandardErrorsHC0, comparer);
             Assert.Equal(standardErrorsHC1, generalized.StandardErrorsHC1, comparer);
-        }
+        }        
     }
 }
