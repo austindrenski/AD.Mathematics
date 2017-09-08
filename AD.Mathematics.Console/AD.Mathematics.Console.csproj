@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AD.Mathematics.Tests\AD.Mathematics.Tests.csproj" />
+    <ProjectReference Include="..\AD.Mathematics\AD.Mathematics.csproj" />
+  </ItemGroup>
+</Project>
