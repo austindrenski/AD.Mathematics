@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 
 namespace AD.Mathematics.Matrix
@@ -41,62 +41,89 @@ namespace AD.Mathematics.Matrix
 
             double[][] weightedDesign = design.CloneArray();
             
-            double[] weightedResponse = response.ToArray();
+            double[] weightedResponse = new double[response.Length];
+            Array.Copy(response, weightedResponse, weightedResponse.Length);
 
-            double sumOfWeights = weights.Sum();
-            double[] scaledWeights = weights.Select(x => Math.Sqrt(x / sumOfWeights)).ToArray();
+            double sumOfWeights = 0.0;
+
+            for (int i = 0; i < weights.Length; i++)
+            {
+                sumOfWeights += weights[i];
+            }
             
             for (int i = 0; i < weightedDesign.Length; i++)
             {
-                weightedResponse[i] *= scaledWeights[i];
+                double scaledWeight = Math.Sqrt(weights[i] / sumOfWeights);
+
+                weightedResponse[i] *= scaledWeight;
                 
                 for (int j = 0; j < weightedDesign[i].Length; j++)
                 {
-                    weightedDesign[i][j] *= scaledWeights[i] ;
+                    weightedDesign[i][j] *= scaledWeight;
                 }
             }
 
             return weightedDesign.RegressOls(weightedResponse);
+        }
 
-            //OLD
+        /// <summary>
+        /// </summary>
+        /// <param name="design"></param>
+        /// <param name="response"></param>
+        /// <param name="weights"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArrayConformabilityException{T}"></exception>
+        [Pure]
+        public static double[] RegressWls([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] ParallelOptions options)
+        {
+            if (design is null)
+            {
+                throw new ArgumentNullException(nameof(design));
+            }
+            if (response is null)
+            {
+                throw new ArgumentNullException(nameof(response));
+            }
+            if (weights is null)
+            {
+                throw new ArgumentNullException(nameof(weights));
+            }
+            if (options is null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+            if (design.Length != response.Length)
+            {
+                throw new ArrayConformabilityException<double>(design, response);
+            }
 
-            //double[] rootWeights = new double[weights.Length];
-            //double[] weightedResponse = new double[weights.Length];
-            //double[][] weightedDesign = new double[weights.Length][];
+            double[][] weightedDesign = design.CloneArray();
+            
+            double[] weightedResponse = new double[response.Length];
+            Array.Copy(response, weightedResponse, weightedResponse.Length);
 
-            //for (int i = 0; i < rootWeights.Length; i++)
-            //{
-            //    rootWeights[i] = Math.Sqrt(weights[i]);
+            double sumOfWeights = 0.0;
 
-            //    weightedResponse[i] = rootWeights[i] * response[i];
+            for (int i = 0; i < weights.Length; i++)
+            {
+                sumOfWeights += weights[i];
+            }
 
-            //    weightedDesign[i] = new double[design[i].Length];
+            Parallel.For(0, weightedDesign.Length, options, i =>
+            {
+                double scaledWeight = Math.Sqrt(weights[i] / sumOfWeights);
 
-            //    for (int j = 0; j < weightedDesign[i].Length; j++)
-            //    {
-            //        weightedDesign[i][j] = rootWeights[i] * design[i][j];
-            //    }
-            //}
+                weightedResponse[i] *= scaledWeight;
 
-            //double[] result = weightedDesign.SolveQr(response);
-
-            //double[] fitted = design.MatrixProduct(result);
-            //double[] weightedFitted = weightedDesign.MatrixProduct(result);
-
-            //double[] residuals = new double[fitted.Length];
-            //double[] weightedResiduals = new double[fitted.Length];
-
-            //for (int i = 0; i < residuals.Length; i++)
-            //{
-            //    residuals[i] = response[i] - fitted[i];
-            //    weightedResiduals[i] = weightedResponse[i] - weightedFitted[i];
-            //}
-
-            //int degreesOfFreedomResidual = weightedDesign.Length - weightedDesign[0].Length;
-
-            //double scale = weightedResiduals.DotProduct(weightedResiduals, 0, weightedResiduals.Length) / degreesOfFreedomResidual;
-
-            //return (result, fitted, residuals, scale);
+                for (int j = 0; j < weightedDesign[i].Length; j++)
+                {
+                    weightedDesign[i][j] *= scaledWeight;
+                }
+            });
+            
+            return weightedDesign.RegressOls(weightedResponse, options);
         }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using JetBrains.Annotations;
 
 namespace AD.Mathematics.Matrix
@@ -28,7 +26,7 @@ namespace AD.Mathematics.Matrix
         /// </returns>
         [Pure]
         [NotNull]
-        public static double[] StandardError([NotNull][ItemNotNull] this IEnumerable<IEnumerable<double>> design, [NotNull] IEnumerable<double> squaredErrors, HeteroscedasticityConsistent heteroscedasticityConsistent)
+        public static double[] StandardError([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] squaredErrors, StandardErrorType heteroscedasticityConsistent)
         {
             if (design is null)
             {
@@ -38,8 +36,21 @@ namespace AD.Mathematics.Matrix
             {
                 throw new ArgumentNullException(nameof(squaredErrors));
             }
+            if (design.Length != squaredErrors.Length)
+            {
+                throw new ArrayConformabilityException<double>(design, squaredErrors);
+            }
 
-            return design.Covariance(squaredErrors, heteroscedasticityConsistent).Select((x, i) => Math.Sqrt(x[i])).ToArray();
+            double[][] covariance = design.Covariance(squaredErrors, heteroscedasticityConsistent);
+
+            double[] result = new double[covariance.Length];
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = Math.Sqrt(covariance[i][i]);
+            }
+
+            return result;
         }
     }
 }

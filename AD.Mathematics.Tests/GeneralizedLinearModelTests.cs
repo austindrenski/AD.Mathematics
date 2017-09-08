@@ -10,16 +10,17 @@ using Xunit;
 
 namespace AD.Mathematics.Tests
 {
+    [PublicAPI]
     public static class GeneralizedLinearModelTests
     {
         [NotNull]
         [ItemNotNull]
-        private static IReadOnlyCollection<GravityCourseObservation> GravityCourseData { get; }
+        public static IReadOnlyCollection<GravityCourseObservation> GravityCourseData { get; }
         
         static GeneralizedLinearModelTests()
         {
             GravityCourseData =
-                File.ReadLines("\\users\\adren\\desktop\\grav_data_course.csv")
+                File.ReadLines("\\users\\austin.drenski\\desktop\\grav_data_course.csv")
                     .SplitDelimitedLine(',')
                     .Skip(1)
                     .Select(x => x.Select(y => y.Trim()).ToArray())
@@ -129,7 +130,7 @@ namespace AD.Mathematics.Tests
                           .ToArray();
             
             GeneralizedLinearModel<int> generalized =
-                new GeneralizedLinearModel<int>(input, response, weights, new PoissonDistribution(), 1.0);
+                new GeneralizedLinearModel<int>(input, response, weights, new PoissonDistribution(), true);
             
             int n = input.Length;
             int k = input[0].Length + 1;

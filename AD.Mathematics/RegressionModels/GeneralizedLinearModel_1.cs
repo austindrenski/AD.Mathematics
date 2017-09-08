@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using AD.Mathematics.Distributions;
 using AD.Mathematics.LinkFunctions;
 using AD.Mathematics.Matrix;
@@ -16,6 +17,10 @@ namespace AD.Mathematics.RegressionModels
     [PublicAPI]
     public class GeneralizedLinearModel<T> : IRegressionModel<T>
     {      
+        private readonly Lazy<double[]> _standardErrorsOls;
+        private readonly Lazy<double[]> _standardErrorsHC0;
+        private readonly Lazy<double[]> _standardErrorsHC1;
+        
         /// <inheritdoc />
         /// <summary>
         /// The distribution used to estimate the model.
@@ -68,19 +73,19 @@ namespace AD.Mathematics.RegressionModels
         /// <summary>
         /// The standard errors for the model intercept and coefficients ≡ SE = sqrt(σ²) = sqrt(Σ(xᵢ - x̄)²).
         /// </summary>
-        public IReadOnlyList<double> StandardErrorsOls { get; }
+        public IReadOnlyList<double> StandardErrorsOls => _standardErrorsOls.Value;
 
         /// <inheritdoc />
         /// <summary>
         /// HCO (White, 1980): the original White (1980) standard errors ≡ Xᵀ * [eᵢ²] * X.
         /// </summary>
-        public IReadOnlyList<double> StandardErrorsHC0 { get; }
+        public IReadOnlyList<double> StandardErrorsHC0 => _standardErrorsHC0.Value;
 
         /// <inheritdoc />
         /// <summary>
         /// HC1 (MacKinnon and White, 1985): the common White standard errors, equivalent to the 'robust' option in Stata ≡ Xᵀ * [eᵢ² * n ÷ (n - k)] * X.
         /// </summary>
-        public IReadOnlyList<double> StandardErrorsHC1 { get; }
+        public IReadOnlyList<double> StandardErrorsHC1 => _standardErrorsHC1.Value;
 
         /// <inheritdoc />
         /// <summary>
@@ -115,7 +120,19 @@ namespace AD.Mathematics.RegressionModels
         /// <param name="distribution">
         /// The distribution class used by the model.
         /// </param>
-        public GeneralizedLinearModel([NotNull][ItemNotNull] double[][] design, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution<T> distribution)
+        /// <param name="addConstant">
+        /// True to prepend the design matrix with a unit vector; otherwise false. 
+        /// </param>
+        /// <param name="options">
+        /// Executes select methods in parallel if provided.
+        /// </param>
+        public GeneralizedLinearModel(
+            [NotNull][ItemNotNull] double[][] design, 
+            [NotNull] double[] response,
+            [NotNull] double[] weights, 
+            [NotNull] IDistribution<T> distribution, 
+            bool addConstant = false,
+            [CanBeNull] ParallelOptions options = default)
         {
             if (design is null)
             {
@@ -133,6 +150,10 @@ namespace AD.Mathematics.RegressionModels
             {
                 throw new ArrayConformabilityException<double>(design, response);
             }
+            if (addConstant)
+            {
+                design = design.Prepend(1.0);
+            }
 
             Distribution  = distribution;
 
@@ -144,48 +165,32 @@ namespace AD.Mathematics.RegressionModels
             
             if (distribution is GaussianDistribution && distribution.LinkFunction is IdentityLinkFunction)
             {
-                Coefficients = design.RegressOls(response);
+                Coefficients = 
+                    options is null
+                        ? design.RegressOls(response) 
+                        : design.RegressOls(response, options);
+                
                 squaredErrors = design.SquaredError(response, Evaluate);
             }
             else
             {
-                (double[] coefficients, double[] weightedResponse) = design.RegressIrls(response, weights, distribution);
-
+                (double[] coefficients, double[] weightedResponse) =
+                    options is null
+                        ? design.RegressIrls(response, weights, distribution)
+                        : design.RegressIrls(response, weights, distribution, options);
+                
                 Coefficients = coefficients;
+                
                 squaredErrors = design.SquaredError(weightedResponse, Evaluate);
             }
-            
+
             SumSquaredErrors = squaredErrors.Sum();
 
-            StandardErrorsOls = design.StandardError(squaredErrors, HeteroscedasticityConsistent.Ols);
+            _standardErrorsOls = new Lazy<double[]>(() => design.StandardError(squaredErrors, StandardErrorType.Ols));
             
-            StandardErrorsHC0 = design.StandardError(squaredErrors, HeteroscedasticityConsistent.HC0);
+            _standardErrorsHC0 = new Lazy<double[]>(() => design.StandardError(squaredErrors, StandardErrorType.HC0));
 
-            StandardErrorsHC1 = design.StandardError(squaredErrors, HeteroscedasticityConsistent.HC1);
-        }
-
-        /// <inheritdoc />
-        /// <summary>
-        /// Constructs a <see cref="GeneralizedLinearModel{T}"/> estimated with the given data and the independent matrix prepended by the constant.
-        /// </summary>
-        /// <param name="independent">
-        /// A collection of independent value vectors.
-        /// </param>
-        /// <param name="response">
-        /// A collection of response values.
-        /// </param>
-        /// <param name="weights">
-        /// An array of importance weights.
-        /// </param>
-        /// <param name="distribution">
-        /// The distribution class used by the model.
-        /// </param>
-        /// <param name="constant">
-        /// The constant used by the model to prepend the design matrix.
-        /// </param>
-        public GeneralizedLinearModel([NotNull][ItemNotNull] double[][] independent, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution<T> distribution, double constant)
-            : this(independent.Prepend(constant), response, weights, distribution)
-        {
+            _standardErrorsHC1 = new Lazy<double[]>(() => design.StandardError(squaredErrors, StandardErrorType.HC1));
         }
 
         /// <inheritdoc />

@@ -81,7 +81,7 @@ namespace AD.Mathematics.RegressionModels
                 throw new ArrayConformabilityException<double>(weights, response);
             }
 
-            return new GeneralizedLinearModel<double>(design, response, weights, new GaussianDistribution(), 1.0);
+            return new GeneralizedLinearModel<double>(design, response, weights, new GaussianDistribution(), true);
         }
     }
 }

@@ -143,7 +143,7 @@ namespace AD.Mathematics.LinkFunctions
             {
                 throw new ArgumentNullException(nameof(x));
             }
-            
+
             double[] result = new double[x.Length];
 
             for (int i = 0; i < result.Length; i++)

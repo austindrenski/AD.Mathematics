@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AD.Mathematics", "AD.Mathem
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AD.Mathematics.Tests", "AD.Mathematics.Tests\AD.Mathematics.Tests.csproj", "{AF881A09-F17C-491D-82A3-43607F52450B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AD.Mathematics.Console", "AD.Mathematics.Console\AD.Mathematics.Console.csproj", "{F4B51CA5-E982-4821-B719-B49A32A799E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{AF881A09-F17C-491D-82A3-43607F52450B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF881A09-F17C-491D-82A3-43607F52450B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF881A09-F17C-491D-82A3-43607F52450B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4B51CA5-E982-4821-B719-B49A32A799E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4B51CA5-E982-4821-B719-B49A32A799E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4B51CA5-E982-4821-B719-B49A32A799E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4B51CA5-E982-4821-B719-B49A32A799E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

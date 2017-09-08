@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using JetBrains.Annotations;
 
 namespace AD.Mathematics.Matrix
@@ -29,7 +27,7 @@ namespace AD.Mathematics.Matrix
         [Pure]
         [NotNull]
         [ItemNotNull]
-        public static double[][] Covariance([NotNull][ItemNotNull] this IEnumerable<IEnumerable<double>> design, [NotNull] IEnumerable<double> squaredErrors, HeteroscedasticityConsistent heteroscedasticityConsistent)
+        public static double[][] Covariance([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] squaredErrors, StandardErrorType heteroscedasticityConsistent)
         {
             if (design is null)
             {
@@ -39,33 +37,28 @@ namespace AD.Mathematics.Matrix
             {
                 throw new ArgumentNullException(nameof(squaredErrors));
             }
-
-            double[][] designArray = design as double[][] ?? (design as IEnumerable<double[]>)?.ToArray() ?? design.Select(x => x.ToArray()).ToArray();
-
-            double[] squaredErrorsArray = squaredErrors as double[] ?? squaredErrors.ToArray();
-
-            if (designArray.Length != squaredErrorsArray.Length || designArray.Length == 0)
+            if (design.Length != squaredErrors.Length || design.Length == 0)
             {
-                throw new ArrayConformabilityException<double>(designArray, squaredErrorsArray);
+                throw new ArrayConformabilityException<double>(design, squaredErrors);
             }
 
             switch (heteroscedasticityConsistent)
             {
-                case HeteroscedasticityConsistent.HC0:
+                case StandardErrorType.HC0:
                 {
-                    return designArray.Covariance(squaredErrorsArray, 1.0);
+                    return design.Covariance(squaredErrors, 1.0);
                 }
-                case HeteroscedasticityConsistent.HC1:
+                case StandardErrorType.HC1:
                 {
-                    return designArray.Covariance(squaredErrorsArray, (double)designArray.Length / (designArray.Length - designArray[0].Length));
+                    return design.Covariance(squaredErrors, (double)design.Length / (design.Length - design[0].Length));
                 }
-                case HeteroscedasticityConsistent.Ols:
+                case StandardErrorType.Ols:
                 {
-                    return designArray.Covariance(squaredErrorsArray);
+                    return design.Covariance(squaredErrors);
                 }
                 default:
                 {
-                    throw new ArgumentException(nameof(HeteroscedasticityConsistent));
+                    throw new ArgumentException(nameof(StandardErrorType));
                 }
             }
         }
@@ -89,15 +82,24 @@ namespace AD.Mathematics.Matrix
         {
             double[][] informationMatrix = design.Transpose().MatrixProduct(design).InvertLu();
 
-            double mean = squaredErrors.Sum() / (design.Length - design[0].Length);
+            double mean = 0.0;
+
+            for (int i = 0; i < squaredErrors.Length; i++)
+            {
+                mean += squaredErrors[i];
+            }
+            
+            mean /= design.Length - design[0].Length;
             
             double[][] covariance = new double[informationMatrix.Length][];
 
+            int informationMatrixInner = informationMatrix[0].Length;
+            
             for (int i = 0; i < informationMatrix.Length; i++)
             {
-                covariance[i] = new double[informationMatrix[i].Length];
+                covariance[i] = new double[informationMatrixInner];
 
-                for (int j = 0; j < informationMatrix[i].Length; j++)
+                for (int j = 0; j < informationMatrixInner; j++)
                 {
                     covariance[i][j] = mean * informationMatrix[i][j];
                 }
@@ -130,11 +132,13 @@ namespace AD.Mathematics.Matrix
 
             double[][] temp = new double[designTranspose.Length][];
 
+            int designTransposeInner = designTranspose[0].Length;
+
             for (int i = 0; i < designTranspose.Length; i++)
             {
-                temp[i] = new double[designTranspose[i].Length];
+                temp[i] = new double[designTransposeInner];
 
-                for (int j = 0; j < designTranspose[i].Length; j++)
+                for (int j = 0; j < designTransposeInner; j++)
                 {
                     temp[i][j] = scalar * designTranspose[i][j] * squaredErrors[j];
                 }

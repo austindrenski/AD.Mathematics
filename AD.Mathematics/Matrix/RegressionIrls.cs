@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using AD.Mathematics.Distributions;
 using JetBrains.Annotations;
 
@@ -112,6 +113,81 @@ namespace AD.Mathematics.Matrix
             }
             
             return true;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="design"></param>
+        /// <param name="response"></param>
+        /// <param name="weights"></param>
+        /// <param name="distribution"></param>
+        /// <param name="options"></param>
+        /// <param name="maxIterations"></param>
+        /// <param name="absoluteTolerance"></param>
+        /// <param name="relativeTolerance"></param>
+        /// <returns></returns>
+        public static (double[] Coefficients, double[] WeightedResponse) RegressIrls([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] double[] weights, [NotNull] IDistribution distribution, ParallelOptions options, int maxIterations = 100, double absoluteTolerance = 1e-8, double relativeTolerance = default)
+        {
+            if (response is null)
+            {
+                throw new ArgumentNullException(nameof(response));
+            }
+            if (design is null)
+            {
+                throw new ArgumentNullException(nameof(design));
+            }            
+            if (weights is null)
+            {
+                throw new ArgumentNullException(nameof(weights));
+            }
+            if (options is null)
+            {
+                throw new ArgumentNullException(nameof(weights));
+            }
+            
+            double[] oldResiduals = new double[design.Length];
+            double[] wlsCoefficients = new double[design[0].Length];
+            double[] wlsResponse = new double[weights.Length];
+            double[] wlsWeights = new double[weights.Length];
+            
+            Array.Copy(weights, wlsWeights, wlsWeights.Length);
+            
+            double[] meanResponse = distribution.InitialMean(response);
+            double[] linearResponse = distribution.Predict(meanResponse);
+            
+            for (int i = 0; i < maxIterations; i++)
+            {              
+                wlsWeights = 
+                    distribution.Weight(meanResponse)
+                                .Multiply(weights);
+
+                wlsResponse = 
+                    distribution.LinkFunction
+                                .FirstDerivative(meanResponse)
+                                .Multiply(response.Subtract(meanResponse))
+                                .Add(linearResponse);
+               
+                wlsCoefficients =
+                    design.RegressWls(wlsResponse, wlsWeights, options);
+
+                linearResponse =
+                    design.MatrixProduct(wlsCoefficients, options);
+                
+                meanResponse =
+                    distribution.Fit(linearResponse);
+
+                double[] residuals = 
+                    response.Subtract(linearResponse);
+                
+                if (HasConverged(residuals, oldResiduals, absoluteTolerance, relativeTolerance))
+                {
+                    break;
+                }
+
+                Array.Copy(residuals, oldResiduals, oldResiduals.Length);
+            }
+
+            return (wlsCoefficients, wlsResponse);
         }
     }
 }
