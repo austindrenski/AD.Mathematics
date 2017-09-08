@@ -83,39 +83,6 @@ namespace AD.Mathematics.Matrix
         }
         
         /// <summary>
-        /// Private helper method to check whether two vectors are sufficiently close to indicate convergence.
-        /// </summary>
-        /// <param name="a">
-        /// The first vector.
-        /// </param>
-        /// <param name="b">
-        /// The second vector.
-        /// </param>
-        /// <param name="absoluteTolerance">
-        /// The absolute tolerance for convergence.
-        /// </param>
-        /// <param name="relativeTolerance">
-        /// The relative tolerance among the calues for convergence.
-        /// </param>
-        /// <returns>
-        /// True if convergence is likely; otherwise false.
-        /// </returns>
-        private static bool HasConverged(double[] a, double[] b, double absoluteTolerance, double relativeTolerance)
-        {
-            double tolerance = absoluteTolerance + relativeTolerance;
-            
-            for (int i = 0; i < a.Length; i++)
-            {
-                if (tolerance * Math.Abs(a[i]) < Math.Abs(a[i] - b[i]))
-                {
-                    return false;
-                }
-            }
-            
-            return true;
-        }
-
-        /// <summary>
         /// </summary>
         /// <param name="design"></param>
         /// <param name="response"></param>
@@ -188,6 +155,39 @@ namespace AD.Mathematics.Matrix
             }
 
             return (wlsCoefficients, wlsResponse);
+        }
+        
+        /// <summary>
+        /// Private helper method to check whether two vectors are sufficiently close to indicate convergence.
+        /// </summary>
+        /// <param name="a">
+        /// The first vector.
+        /// </param>
+        /// <param name="b">
+        /// The second vector.
+        /// </param>
+        /// <param name="absoluteTolerance">
+        /// The absolute tolerance for convergence.
+        /// </param>
+        /// <param name="relativeTolerance">
+        /// The relative tolerance among the calues for convergence.
+        /// </param>
+        /// <returns>
+        /// True if convergence is likely; otherwise false.
+        /// </returns>
+        private static bool HasConverged(double[] a, double[] b, double absoluteTolerance, double relativeTolerance)
+        {
+            double tolerance = absoluteTolerance + relativeTolerance;
+            
+            for (int i = 0; i < a.Length; i++)
+            {
+                if (tolerance * Math.Abs(a[i]) < Math.Abs(a[i] - b[i]))
+                {
+                    return false;
+                }
+            }
+            
+            return true;
         }
     }
 }

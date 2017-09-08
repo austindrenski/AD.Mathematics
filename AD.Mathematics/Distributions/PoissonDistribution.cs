@@ -148,13 +148,13 @@ namespace AD.Mathematics.Distributions
         /// The value of the log-likelihood function evaluated with the given inputs.
         /// </returns>
         [Pure]
-        public double LogLikelihood(IReadOnlyList<double> response, IReadOnlyList<double> meanResponse, IReadOnlyList<double> weights, double scale = 1.0)
+        public double LogLikelihood(double[] response, double[] meanResponse, double[] weights, double scale = 1.0)
         {
             double result = 0.0;
 
             double common = Math.Log(Math.PI * 2.0 * scale);
 
-            for (int i = 0; i < response.Count; i++)
+            for (int i = 0; i < response.Length; i++)
             {
                 double error = response[i] - meanResponse[i];
 
@@ -185,9 +185,9 @@ namespace AD.Mathematics.Distributions
         /// <returns>
         /// The deviance function evaluated with the given inputs.
         /// </returns>
-        public double Deviance(IReadOnlyList<double> response, IReadOnlyList<double> meanResponse, IReadOnlyList<double> weights, double scale = 1.0)
+        public double Deviance(double[] response, double[] meanResponse, double[] weights, double scale = 1.0)
         {
-            double[] divided = new double[response.Count];
+            double[] divided = new double[response.Length];
 
             for (int i = 0; i < divided.Length; i++)
             {

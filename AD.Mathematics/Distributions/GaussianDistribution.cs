@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using AD.Mathematics.LinkFunctions;
 using JetBrains.Annotations;
 
@@ -65,13 +64,13 @@ namespace AD.Mathematics.Distributions
         /// <summary>
         /// Gets the skewness of the distribution.
         /// </summary>
-        public double Skewness => default(double);
+        public double Skewness => default;
 
         /// <inheritdoc />
         /// <summary>
         /// Gets the kurtosis of the distribution.
         /// </summary>
-        public double Kurtosis => default(double);
+        public double Kurtosis => default;
 
         /// <inheritdoc />
         /// <summary>
@@ -160,22 +159,22 @@ namespace AD.Mathematics.Distributions
         /// The value of the log-likelihood function evaluated with the given inputs.
         /// </returns>
         [Pure]
-        public double LogLikelihood(IReadOnlyList<double> response, IReadOnlyList<double> meanResponse, IReadOnlyList<double> weights, double scale = 1.0)
+        public double LogLikelihood(double[] response, double[] meanResponse, double[] weights, double scale = 1.0)
         {
             if (LinkFunction is IdentityLinkFunction || LinkFunction is PowerLinkFunction power && power.Power is 1.0)
             {
-                double[] fitted = Fit(meanResponse.ToArray());
+                double[] fitted = Fit(meanResponse);
 
                 double sumSquaredErrors = 0.0;
 
-                for (int i = 0; i < response.Count; i++)
+                for (int i = 0; i < response.Length; i++)
                 {
                     double error = response[i] - fitted[i];
 
                     sumSquaredErrors += error * error;
                 }
 
-                double halfObs = response.Count / 2.0;
+                double halfObs = 0.5 * response.Length;
 
                 return -halfObs * (Math.Log(sumSquaredErrors) + (1.0 + Math.Log(Math.PI / halfObs)));
             }
@@ -184,7 +183,7 @@ namespace AD.Mathematics.Distributions
 
             double common = Math.Log(Math.PI * 2.0 * scale);
 
-            for (int i = 0; i < response.Count; i++)
+            for (int i = 0; i < response.Length; i++)
             {
                 double error = response[i] - meanResponse[i];
 
@@ -213,11 +212,11 @@ namespace AD.Mathematics.Distributions
         /// <returns>
         /// The deviance function evaluated with the given inputs.
         /// </returns>
-        public double Deviance(IReadOnlyList<double> response, IReadOnlyList<double> meanResponse, IReadOnlyList<double> weights, double scale = 1.0)
+        public double Deviance(double[] response, double[] meanResponse, double[] weights, double scale = 1.0)
         {
             double result = 0.0;
 
-            for (int i = 0; i < response.Count; i++)
+            for (int i = 0; i < response.Length; i++)
             {
                 double error = response[i] - meanResponse[i];
                 result += weights[i] * error * error;
@@ -271,9 +270,23 @@ namespace AD.Mathematics.Distributions
         [Pure]
         public double[] InitialMean(double[] response)
         {
-            double mean = response.Average();
+            double mean = 0.0;
 
-            return response.Select(x => (x + mean) / 2.0).ToArray();
+            for (int i = 0; i < response.Length; i++)
+            {
+                mean += response[i];
+            }
+
+            mean /= response.Length;
+
+            double[] initialMean = new double[response.Length];
+            
+            for (int i = 0; i < response.Length; i++)
+            {
+                initialMean[i] = 0.5 * (response[i] + mean);
+            }
+
+            return initialMean;
         }
 
         /// <inheritdoc />
@@ -288,8 +301,16 @@ namespace AD.Mathematics.Distributions
         /// </returns>
         [Pure]
         public double[] Weight(double[] meanResponse)
-        {
-            return LinkFunction.FirstDerivative(meanResponse).Select(x => x * x * Variance).Select(x => 1.0 / x).ToArray();
+        {                   
+            double[] weight = new double[meanResponse.Length];
+            double[] derivative = LinkFunction.FirstDerivative(meanResponse);
+
+            for (int i = 0; i < derivative.Length; i++)
+            {
+                weight[i] = 1.0 / (derivative[i] * derivative[i] * Variance);
+            }
+
+            return weight;
         }
         
         /// <inheritdoc />

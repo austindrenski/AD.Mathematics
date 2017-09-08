@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using AD.Mathematics.LinkFunctions;
+﻿using AD.Mathematics.LinkFunctions;
 using JetBrains.Annotations;
 
 namespace AD.Mathematics.Distributions
@@ -85,7 +83,7 @@ namespace AD.Mathematics.Distributions
         /// <returns>
         /// The deviance function evaluated with the given inputs.
         /// </returns>
-        double Deviance([NotNull] IReadOnlyList<double> response, [NotNull] IReadOnlyList<double> mean, [NotNull] IReadOnlyList<double> weights, double scale = 1.0);
+        double Deviance([NotNull] double[] response, [NotNull] double[] mean, [NotNull] double[] weights, double scale = 1.0);
 
         /// <summary>
         /// Calculates a mean value given a linear prediction.
@@ -131,7 +129,7 @@ namespace AD.Mathematics.Distributions
         /// The value of the log-likelihood function evaluated with the given inputs.
         /// </returns>
         [Pure]
-        double LogLikelihood([NotNull] IReadOnlyList<double> response, [NotNull] IReadOnlyList<double> mean, [NotNull] IReadOnlyList<double> weights, double scale = 1.0);
+        double LogLikelihood([NotNull] double[] response, [NotNull] double[] mean, [NotNull] double[] weights, double scale = 1.0);
 
         /// <summary>
         /// The logarithm of the probability function of the distribution.

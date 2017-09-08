@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 
 namespace AD.Mathematics.Distributions
 {
+    /// <inheritdoc />
     /// <summary>
     /// Represents a statistical distribution from which values can be drawn.
     /// </summary>
