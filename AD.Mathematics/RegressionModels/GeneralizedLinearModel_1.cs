@@ -38,7 +38,7 @@ namespace AD.Mathematics.RegressionModels
         /// <summary>
         /// The degrees of freedom for the model ≡ df = N - K.
         /// </summary>
-        public int DegreesOfFreedom => ObservationCount - Coefficients.Count;
+        public int DegreesOfFreedom => ObservationCount - VariableCount;
         
         /// <inheritdoc />
         /// <summary>
@@ -190,26 +190,26 @@ namespace AD.Mathematics.RegressionModels
 
         /// <inheritdoc />
         /// <summary>
-        /// Evaluates the regression for a given response vector.
+        /// Evaluates the regression for a given observation vector.
         /// </summary>
-        /// <param name="designVector">
-        /// The design vector to which a transformation is applied.
+        /// <param name="observation">
+        /// The observation vector to which a transformation is applied.
         /// </param>
         /// <returns>
-        /// The value of the transformation given independent values vector.
+        /// The value of the transformation given observation vector.
         /// </returns>
-        public double Evaluate(IReadOnlyList<double> designVector)
+        public double Evaluate(IReadOnlyList<double> observation)
         {
-            if (designVector is null)
+            if (observation is null)
             {
-                throw new ArgumentNullException(nameof(designVector));
+                throw new ArgumentNullException(nameof(observation));
             }
 
             double result = 0.0;
 
-            for (int i = 0; i < designVector.Count; i++)
+            for (int i = 0; i < observation.Count; i++)
             {
-                result += Coefficients[i] * designVector[i];
+                result += Coefficients[i] * observation[i];
             }
 
             return result;

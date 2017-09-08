@@ -89,15 +89,15 @@ namespace AD.Mathematics.RegressionModels
         IEnumerable<double> VarianceHC1 { get; }
 
         /// <summary>
-        /// Evaluates the regression for a given response vector.
+        /// Evaluates the regression for a given observation vector.
         /// </summary>
-        /// <param name="designVector">
-        /// The design vector to which a transformation is applied.
+        /// <param name="observation">
+        /// The observation vector to which a transformation is applied.
         /// </param>
         /// <returns>
-        /// The value of the transformation given independent values vector.
+        /// The value of the transformation given observation vector.
         /// </returns>
         [Pure]
-        double Evaluate([NotNull] IReadOnlyList<double> designVector);
+        double Evaluate([NotNull] IReadOnlyList<double> observation);
     }
 }

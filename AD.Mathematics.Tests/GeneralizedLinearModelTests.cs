@@ -19,7 +19,7 @@ namespace AD.Mathematics.Tests
         static GeneralizedLinearModelTests()
         {
             GravityCourseData =
-                File.ReadLines("\\users\\austin.drenski\\desktop\\grav_data_course.csv")
+                File.ReadLines("\\users\\adren\\desktop\\grav_data_course.csv")
                     .SplitDelimitedLine(',')
                     .Skip(1)
                     .Select(x => x.Select(y => y.Trim()).ToArray())
@@ -39,7 +39,6 @@ namespace AD.Mathematics.Tests
                     .ToArray();
         }
 
-        
         /// <summary>
         /// Test if the <see cref="GeneralizedLinearModel{T}"/> with a <see cref="GaussianDistribution"/> replicates a known regression.
         /// </summary>

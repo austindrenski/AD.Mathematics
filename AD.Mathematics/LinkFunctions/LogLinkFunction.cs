@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using JetBrains.Annotations;
 
 namespace AD.Mathematics.LinkFunctions
@@ -33,7 +32,7 @@ namespace AD.Mathematics.LinkFunctions
         /// <param name="intercept">
         /// The intercept value. Defaults to 0.0.
         /// </param>
-        public LogLinkFunction(double slope = 1.0, double intercept = 0.0)
+        public LogLinkFunction(double slope = 1.0, double intercept = default)
         {
             Slope = slope;
             Intercept = intercept;
@@ -55,7 +54,19 @@ namespace AD.Mathematics.LinkFunctions
         [Pure]
         public double[] Evaluate(double[] x)
         {
-            return x.Select(Check).Select(y => Math.Log(y)).ToArray();
+            if (x is null)
+            {
+                throw new ArgumentNullException(nameof(x));
+            }
+            
+            double[] result = new double[x.Length];
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = Math.Log(Check(x[i]));
+            }
+
+            return result;
         }
 
         /// <inheritdoc />
@@ -74,7 +85,19 @@ namespace AD.Mathematics.LinkFunctions
         [Pure]
         public double[] Inverse(double[] x)
         {
-            return x.Select(Math.Exp).ToArray();
+            if (x is null)
+            {
+                throw new ArgumentNullException(nameof(x));
+            }
+            
+            double[] result = new double[x.Length];
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = Math.Exp(x[i]);
+            }
+
+            return result;
         }
 
         /// <inheritdoc />
@@ -89,7 +112,19 @@ namespace AD.Mathematics.LinkFunctions
         /// </returns>
         public double[] FirstDerivative(double[] x)
         {
-            return x.Select(Check).Select(y => 1.0 / y).ToArray();
+            if (x is null)
+            {
+                throw new ArgumentNullException(nameof(x));
+            }
+            
+            double[] result = new double[x.Length];
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = 1.0 / Check(x[i]);
+            }
+
+            return result;
         }
 
         /// <inheritdoc />
@@ -104,7 +139,20 @@ namespace AD.Mathematics.LinkFunctions
         /// </returns>
         public double[] SecondDerivative(double[] x)
         {
-            return x.Select(Check).Select(y => -1.0 / (y * y)).ToArray();
+            if (x is null)
+            {
+                throw new ArgumentNullException(nameof(x));
+            }
+            
+            double[] result = new double[x.Length];
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                double temp = Check(x[i]);
+                result[i] = -1.0 / (temp * temp);
+            }
+
+            return result;
         }
 
         private static double Check(double x)

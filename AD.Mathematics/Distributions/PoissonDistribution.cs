@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using AD.Mathematics.LinkFunctions;
-using AD.Mathematics.Matrix;
 using AD.Mathematics.SpecialFunctions;
 using JetBrains.Annotations;
 
@@ -71,7 +69,7 @@ namespace AD.Mathematics.Distributions
         /// <summary>
         /// Gets the minimum of the distribution.
         /// </summary>
-        public double Minimum => default(double);
+        public double Minimum => default;
 
         /// <inheritdoc />
         /// <summary>
@@ -115,7 +113,7 @@ namespace AD.Mathematics.Distributions
         /// <param name="random">
         /// A random number generator for the distribution. Defaults to <see cref="Random"/>.
         /// </param>
-        public PoissonDistribution(double mean = 1.0, [CanBeNull] ILinkFunction linkFunction = null, [CanBeNull] Random random = null)
+        public PoissonDistribution(double mean = 1.0, [CanBeNull] ILinkFunction linkFunction = default, [CanBeNull] Random random = default)
         {
             if (mean <= 0)
             {
@@ -226,9 +224,23 @@ namespace AD.Mathematics.Distributions
         [Pure]
         public double[] InitialMean(double[] response)
         {         
-            double mean = response.Average();
+            double mean = 0.0;
+
+            for (int i = 0; i < response.Length; i++)
+            {
+                mean += response[i];
+            }
+
+            mean /= response.Length;
+
+            double[] initialMean = new double[response.Length];
             
-            return response.Select(x => (x + mean) / 2.0).ToArray();
+            for (int i = 0; i < response.Length; i++)
+            {
+                initialMean[i] = 0.5 * (response[i] + mean);
+            }
+
+            return initialMean;
         }
 
         /// <inheritdoc />
@@ -243,15 +255,22 @@ namespace AD.Mathematics.Distributions
         /// </returns>
         [Pure]
         public double[] Weight(double[] meanResponse)
-        {
-            double[] absMean =
-                meanResponse.Select(Math.Abs).ToArray();
+        {           
+            double[] weight = new double[meanResponse.Length];          
             
-            return
-                LinkFunction.FirstDerivative(meanResponse)
-                            .Select((x, i) => x * x * absMean[i])
-                            .Select(x => 1.0 / x)
-                            .ToArray();
+            for (int i = 0; i < meanResponse.Length; i++)
+            {
+                weight[i] = Math.Abs(meanResponse[i]);
+            }
+         
+            double[] derivative = LinkFunction.FirstDerivative(weight);
+
+            for (int i = 0; i < derivative.Length; i++)
+            {
+                weight[i] = 1.0 / (derivative[i] * derivative[i] * weight[i]);
+            }
+
+            return weight;
         }
         
         /// <inheritdoc />
