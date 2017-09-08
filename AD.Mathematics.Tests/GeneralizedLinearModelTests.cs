@@ -159,6 +159,92 @@ namespace AD.Mathematics.Tests
             Assert.Equal(standardErrorsOls, generalized.StandardErrorsOls, comparer);
             Assert.Equal(standardErrorsHC0, generalized.StandardErrorsHC0, comparer);
             Assert.Equal(standardErrorsHC1, generalized.StandardErrorsHC1, comparer);
-        }        
+        }
+        
+        /// <summary>
+        /// Test if the <see cref="GeneralizedLinearModel{T}"/> with a <see cref="PoissonDistribution"/> replicates a known regression.
+        /// </summary>
+        [Fact(DisplayName = "GLM test: Poisson with fixed effects")]
+        public static void GlmPoisson1()
+        {
+            UnitTestEqualityComparer comparer = new UnitTestEqualityComparer(8);
+
+            var data =
+                GravityCourseData
+                    .GroupBy(
+                        x => new
+                        {
+                            x.Year
+                        })
+                    .Select(
+                        x => new
+                        {
+                            x,
+                            MeanTrade = x.Average(y => y.Trade),
+                            MeanDistance = x.Average(y => y.Distance)
+                        })
+                    .SelectMany(
+                        x => x.x.Select(
+                            y => new
+                            {
+                                Trade = y.Trade - x.MeanTrade,
+                                Distance = y.Distance - x.MeanDistance,
+                                y.CommonBorder,
+                                y.CommonLanguage,
+                                y.ColonialRelationship
+                            }))
+                    .Where(x => x.Trade > 0 && x.Distance > 0)
+                    .ToArray();
+            
+            double[][] input =
+                data.Select(
+                        x => new double[]
+                        {
+                            Math.Log(x.Distance),
+                            x.CommonBorder,
+                            x.CommonLanguage,
+                            x.ColonialRelationship
+                        })
+                    .ToArray();
+
+            double[] response =
+                data.Select(x => x.Trade)
+                    .ToArray();
+
+            double[] weights =
+                Enumerable.Repeat(1.0, response.Length)
+                          .ToArray();
+            
+            GeneralizedLinearModel<int> generalized =
+                new GeneralizedLinearModel<int>(input, response, weights, new PoissonDistribution(), true);
+            
+            int n = input.Length;
+            int k = input[0].Length + 1;
+            int df = n - k;
+
+            double[] coefficients = new double[] { 13.728590, -0.772651, 0.180037, -0.876162, -0.078427 };
+//            
+//            double[] varianceOls = new double[] { 4.110142e-07, 5.480129e-07, 1.331497e-06 };
+//            double[] varianceHC0 = new double[] { 0.005335,  0.011331,  0.028898 };
+//            double[] varianceHC1 = new double[] { 0.005335, 0.011331,  0.028898 };
+//
+//            double[] standardErrorsOls = varianceOls.Select(Math.Sqrt).ToArray();
+//            double[] standardErrorsHC0 = varianceHC0.Select(Math.Sqrt).ToArray();
+//            double[] standardErrorsHC1 = varianceHC1.Select(Math.Sqrt).ToArray();
+
+            Assert.Equal(n, generalized.ObservationCount);
+            Assert.Equal(k, generalized.VariableCount);
+            Assert.Equal(df, generalized.DegreesOfFreedom);
+
+            Assert.Equal(coefficients, generalized.Coefficients, comparer);
+//
+//            Assert.Equal(varianceOls, generalized.VarianceOls, comparer);
+//            Assert.Equal(varianceHC0, generalized.VarianceHC0, comparer);
+//            Assert.Equal(varianceHC1, generalized.VarianceHC1, comparer);
+//
+//            Assert.Equal(standardErrorsOls, generalized.StandardErrorsOls, comparer);
+//            Assert.Equal(standardErrorsHC0, generalized.StandardErrorsHC0, comparer);
+//            Assert.Equal(standardErrorsHC1, generalized.StandardErrorsHC1, comparer);
+        }    
     }
 }
