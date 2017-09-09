@@ -28,44 +28,49 @@ namespace AD.Mathematics.Matrix
             Dictionary<int, Dictionary<double, int>> indicatorLookup =
                 new Dictionary<int, Dictionary<double, int>>();
 
+            Dictionary<int, int> forwardMap = new Dictionary<int, int>();
+
+            for (int i = 0; i < source[0].Length; i++)
+            {
+                if (!indicators.Contains(i))
+                {
+                    forwardMap.Add(i, forwardMap.Count);
+                }
+            }
+
+            int columnPointer = source[0].Length - indicators.Length;
+
             for (int i = 0; i < indicators.Length; i++)
             {
-                SortedSet<double> set = new SortedSet<double>();
-                
-                Dictionary<double, int> indicatorMap = new Dictionary<double, int>();
-                
-                for (int j = 0; j < source.Length; j++)
-                {
-                    double value = source[j][indicators[i]];
-                    
-                    if (set.Add(value))
-                    {
-                        indicatorMap.Add(value, i);
-                    }
-                }
-                
+                int loopIndicator = indicators[i];
+                int loopColumnPointer = columnPointer;
+
+                Dictionary<double, int> indicatorMap =
+                    source.Select((x, j) => x[loopIndicator])
+                          .Distinct()
+                          .Select((x, j) => (key: j, value: x))
+                          .ToDictionary(x => x.value, x => x.key + loopColumnPointer);
+
+                columnPointer += indicatorMap.Count;
+
                 indicatorLookup.Add(indicators[i], indicatorMap);
             }
 
             double[][] result = new double[source.Length][];
 
-            int sum = indicatorLookup.Sum(x => x.Value.Count);
-
-            int resultColumns = source.Length - indicators.Length + sum;
-            
             for (int i = 0; i < source.Length; i++)
             {
-                result[i] = new double[resultColumns];
+                result[i] = new double[columnPointer];
                 
                 for (int j = 0; j < source[0].Length; j++)
                 {
-                    if (!indicators.Contains(j))
+                    if (indicatorLookup.TryGetValue(j, out Dictionary<double, int> appendMap))
                     {
-                        result[i][j] = source[i][j];
+                        result[i][appendMap[source[i][j]]] = 1.0;
                     }
                     else
                     {
-                        result[i][indicatorLookup[j][source[i][j]]] = 1.0;
+                        result[i][forwardMap[j]] = source[i][j];
                     }
                 }
             }

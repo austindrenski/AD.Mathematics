@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 
 namespace AD.Mathematics.Matrix
@@ -83,6 +84,31 @@ namespace AD.Mathematics.Matrix
             (double[][] orthogonal, double[][] upper) = designTransposeCrossDesign.DecomposeQr();
 
             double[] t = orthogonal.Transpose().MatrixProduct(transpose).MatrixProduct(response);
+
+            return upper.SolveLu(t);
+        }
+
+        [Pure]
+        [NotNull]
+        public static double[] SolveQr([NotNull][ItemNotNull] this double[][] design, [NotNull] double[] response, [NotNull] ParallelOptions options)
+        {
+            if (design is null)
+            {
+                throw new ArgumentNullException(nameof(design));
+            }
+            if (response is null)
+            {
+                throw new ArgumentNullException(nameof(response));
+            }
+
+            double[][] transpose =
+                design.Transpose(options);
+
+            double[][] designTransposeCrossDesign = transpose.MatrixProduct(design, options);
+
+            (double[][] orthogonal, double[][] upper) = designTransposeCrossDesign.DecomposeQr();
+
+            double[] t = orthogonal.Transpose(options).MatrixProduct(transpose, options).MatrixProduct(response, options);
 
             return upper.SolveLu(t);
         }

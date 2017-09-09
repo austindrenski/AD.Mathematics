@@ -17,7 +17,7 @@ namespace AD.Mathematics.Tests
         static RegressionTesting()
         {
             WeightedRegressionData =
-                File.ReadLines("\\users\\austin.drenski\\desktop\\wls_example_data.csv")
+                File.ReadLines("\\users\\adren\\desktop\\wls_example_data.csv")
                     .SplitDelimitedLine(',')
                     .Skip(1)
                     .Select(x => x.Select(y => y.Trim()).ToArray())

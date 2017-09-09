@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using AD.IO;
 using AD.Mathematics.Distributions;
+using AD.Mathematics.Matrix;
 using AD.Mathematics.RegressionModels;
 using JetBrains.Annotations;
 using Xunit;
@@ -20,7 +21,7 @@ namespace AD.Mathematics.Tests
         static GeneralizedLinearModelTests()
         {
             GravityCourseData =
-                File.ReadLines("\\users\\austin.drenski\\desktop\\grav_data_course.csv")
+                File.ReadLines("\\users\\adren\\desktop\\grav_data_course.csv")
                     .SplitDelimitedLine(',')
                     .Skip(1)
                     .Select(x => x.Select(y => y.Trim()).ToArray())
@@ -169,54 +170,61 @@ namespace AD.Mathematics.Tests
         {
             UnitTestEqualityComparer comparer = new UnitTestEqualityComparer(8);
 
-            var data =
-                GravityCourseData
-                    .GroupBy(
-                        x => new
-                        {
-                            x.Year
-                        })
-                    .Select(
-                        x => new
-                        {
-                            x,
-                            MeanTrade = x.Average(y => y.Trade),
-                            MeanDistance = x.Average(y => y.Distance)
-                        })
-                    .SelectMany(
-                        x => x.x.Select(
-                            y => new
-                            {
-                                Trade = y.Trade - x.MeanTrade,
-                                Distance = y.Distance - x.MeanDistance,
-                                y.CommonBorder,
-                                y.CommonLanguage,
-                                y.ColonialRelationship
-                            }))
-                    .Where(x => x.Trade > 0 && x.Distance > 0)
-                    .ToArray();
-            
+            double[][] groupMeans =
+                GravityCourseData.GroupBy(
+                                     x => new
+                                     {
+                                         x.Importer,
+                                         x.Exporter,
+                                         x.Year
+                                     })
+                                 .Select(
+                                     x => new
+                                     {
+                                         x,
+                                         dist = x.Average(y => y.Distance),
+                                         trade = x.Average(y => y.Trade)
+                                     })
+                                 .Select(
+                                     x =>
+                                         x.x.SelectMany(
+                                              y => new double[]
+                                              {
+                                                  x.dist,
+                                                  x.trade
+                                              })
+                                          .ToArray())
+                                 .ToArray();
+
+            double[] grandMeans =
+                new double[]
+                {
+                    groupMeans.Average(x => x[0]),
+                    groupMeans.Average(x => x[1])
+                };
+
             double[][] input =
-                data.Select(
-                        x => new double[]
-                        {
-                            Math.Log(x.Distance),
-                            x.CommonBorder,
-                            x.CommonLanguage,
-                            x.ColonialRelationship
-                        })
-                    .ToArray();
+                GravityCourseData.Select(
+                                     (x, i) => new double[]
+                                     {
+                                         Math.Log(x.Distance) - Math.Log(groupMeans[i][0]) + Math.Log(grandMeans[0]),
+                                         x.CommonBorder,
+                                         x.CommonLanguage,
+                                         x.ColonialRelationship
+                                     })
+                                 .ToArray();
 
             double[] response =
-                data.Select(x => x.Trade)
-                    .ToArray();
+                GravityCourseData.Select(
+                                     (x, i) => x.Trade - groupMeans[i][1] + grandMeans[1])
+                                 .ToArray();
 
             double[] weights =
                 Enumerable.Repeat(1.0, response.Length)
                           .ToArray();
             
             GeneralizedLinearModel<int> generalized =
-                new GeneralizedLinearModel<int>(input, response, weights, new PoissonDistribution(), true);
+                new GeneralizedLinearModel<int>(input, response, weights, new PoissonDistribution(), true, new System.Threading.Tasks.ParallelOptions());
             
             int n = input.Length;
             int k = input[0].Length + 1;
