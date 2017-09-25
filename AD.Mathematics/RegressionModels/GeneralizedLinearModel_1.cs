@@ -159,7 +159,7 @@ namespace AD.Mathematics.RegressionModels
             
             VariableCount = designArray[0].Length;
 
-            double[] squaredErrors;
+            double[] resultResponse;
             
             if (distribution is GaussianDistribution && distribution.LinkFunction is IdentityLinkFunction)
             {
@@ -168,26 +168,22 @@ namespace AD.Mathematics.RegressionModels
                         ? designArray.RegressOls(response) 
                         : designArray.RegressOls(response, options);
                 
-                squaredErrors = designArray.SquaredError(response, Evaluate);
+                resultResponse = response;
             }
             else
             {
-                (double[] coefficients, double[] weightedResponse) =
+                (Coefficients, resultResponse) =
                     options is null
                         ? designArray.RegressIrls(response, weights, distribution)
                         : designArray.RegressIrls(response, weights, distribution, options);
-                
-                Coefficients = coefficients;
-                
-                squaredErrors = designArray.SquaredError(weightedResponse, Evaluate);
             }
+            
+            double[] squaredErrors = designArray.SquaredError(resultResponse, Evaluate);
 
             SumSquaredErrors = squaredErrors.Sum();
 
             _standardErrorsOls = new Lazy<double[]>(() => designArray.StandardError(squaredErrors, StandardErrorType.Ols));
-            
             _standardErrorsHC0 = new Lazy<double[]>(() => designArray.StandardError(squaredErrors, StandardErrorType.HC0));
-
             _standardErrorsHC1 = new Lazy<double[]>(() => designArray.StandardError(squaredErrors, StandardErrorType.HC1));
         }
 
