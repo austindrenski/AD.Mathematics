@@ -150,16 +150,14 @@ namespace AD.Mathematics.RegressionModels
             {
                 throw new ArrayConformabilityException<double>(design, response);
             }
-            if (addConstant)
-            {
-                design = design.Prepend(1.0);
-            }
+
+            double[][] designArray = addConstant ? design.Prepend(1.0) : design;
 
             Distribution  = distribution;
 
-            ObservationCount = design.Length;
+            ObservationCount = designArray.Length;
             
-            VariableCount = design[0].Length;
+            VariableCount = designArray[0].Length;
 
             double[] squaredErrors;
             
@@ -167,30 +165,30 @@ namespace AD.Mathematics.RegressionModels
             {
                 Coefficients = 
                     options is null
-                        ? design.RegressOls(response) 
-                        : design.RegressOls(response, options);
+                        ? designArray.RegressOls(response) 
+                        : designArray.RegressOls(response, options);
                 
-                squaredErrors = design.SquaredError(response, Evaluate);
+                squaredErrors = designArray.SquaredError(response, Evaluate);
             }
             else
             {
                 (double[] coefficients, double[] weightedResponse) =
                     options is null
-                        ? design.RegressIrls(response, weights, distribution)
-                        : design.RegressIrls(response, weights, distribution, options);
+                        ? designArray.RegressIrls(response, weights, distribution)
+                        : designArray.RegressIrls(response, weights, distribution, options);
                 
                 Coefficients = coefficients;
                 
-                squaredErrors = design.SquaredError(weightedResponse, Evaluate);
+                squaredErrors = designArray.SquaredError(weightedResponse, Evaluate);
             }
 
             SumSquaredErrors = squaredErrors.Sum();
 
-            _standardErrorsOls = new Lazy<double[]>(() => design.StandardError(squaredErrors, StandardErrorType.Ols));
+            _standardErrorsOls = new Lazy<double[]>(() => designArray.StandardError(squaredErrors, StandardErrorType.Ols));
             
-            _standardErrorsHC0 = new Lazy<double[]>(() => design.StandardError(squaredErrors, StandardErrorType.HC0));
+            _standardErrorsHC0 = new Lazy<double[]>(() => designArray.StandardError(squaredErrors, StandardErrorType.HC0));
 
-            _standardErrorsHC1 = new Lazy<double[]>(() => design.StandardError(squaredErrors, StandardErrorType.HC1));
+            _standardErrorsHC1 = new Lazy<double[]>(() => designArray.StandardError(squaredErrors, StandardErrorType.HC1));
         }
 
         /// <inheritdoc />
