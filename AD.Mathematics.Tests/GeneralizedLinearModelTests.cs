@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using AD.IO;
 using AD.Mathematics.Distributions;
-using AD.Mathematics.Matrix;
 using AD.Mathematics.RegressionModels;
 using JetBrains.Annotations;
 using Xunit;
@@ -21,7 +20,7 @@ namespace AD.Mathematics.Tests
         static GeneralizedLinearModelTests()
         {
             GravityCourseData =
-                File.ReadLines("\\users\\adren\\desktop\\grav_data_course.csv")
+                File.ReadLines("\\users\\austin.drenski\\desktop\\grav_data_course.csv")
                     .SplitDelimitedLine(',')
                     .Skip(1)
                     .Select(x => x.Select(y => y.Trim()).ToArray())
@@ -129,9 +128,9 @@ namespace AD.Mathematics.Tests
             double[] weights =
                 Enumerable.Repeat(1.0, response.Length)
                           .ToArray();
-            
-            GeneralizedLinearModel<int> generalized =
-                new GeneralizedLinearModel<int>(input, response, weights, new PoissonDistribution(), true);
+
+            GeneralizedLinearModel<double> generalized = 
+                GeneralizedLinearModel.PoissonRegression(input, response, weights);
             
             int n = input.Length;
             int k = input[0].Length + 1;
@@ -223,8 +222,8 @@ namespace AD.Mathematics.Tests
                 Enumerable.Repeat(1.0, response.Length)
                           .ToArray();
             
-            GeneralizedLinearModel<int> generalized =
-                new GeneralizedLinearModel<int>(input, response, weights, new PoissonDistribution(), true, new System.Threading.Tasks.ParallelOptions());
+            GeneralizedLinearModel<double> generalized = 
+                GeneralizedLinearModel.PoissonRegression(input, response, weights, new System.Threading.Tasks.ParallelOptions());
             
             int n = input.Length;
             int k = input[0].Length + 1;

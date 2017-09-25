@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using AD.Mathematics.Distributions;
 using JetBrains.Annotations;
 
-namespace AD.Mathematics.RegressionModels
+namespace AD.Mathematics
 {
     /// <summary>
     /// Represents a regression model.

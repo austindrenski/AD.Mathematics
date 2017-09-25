@@ -1,7 +1,6 @@
-﻿using AD.Mathematics.LinkFunctions;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 
-namespace AD.Mathematics.Distributions
+namespace AD.Mathematics
 {
     /// <summary>
     /// Represents a statistical distribution.

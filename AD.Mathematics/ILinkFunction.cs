@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace AD.Mathematics.LinkFunctions
+namespace AD.Mathematics
 {
     /// <summary>
     /// Represents a link function providing methods for evaluation and inverse evaluation.
@@ -55,5 +55,26 @@ namespace AD.Mathematics.LinkFunctions
         /// </returns>
         [Pure]
         double[] SecondDerivative(double[] x);
+
+        /// <summary>
+        /// The log-likelihood function.
+        /// </summary>
+        /// <param name="response">
+        /// An array of response values.
+        /// </param>
+        /// <param name="meanResponse">
+        /// An array of fitted mean response values.
+        /// </param>
+        /// <param name="weights">
+        /// An optional array of importance weights.
+        /// </param>
+        /// <param name="scale">
+        /// An optional value that scales the log-likelihood function.
+        /// </param>
+        /// <returns>
+        /// The value of the log-likelihood function evaluated with the given inputs.
+        /// </returns>
+        [Pure]
+        double LogLikelihood(double[] response, double[] meanResponse, double[] weights, double scale);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using AD.Mathematics.LinkFunctions;
 using JetBrains.Annotations;
 
 namespace AD.Mathematics.Distributions
@@ -94,16 +93,16 @@ namespace AD.Mathematics.Distributions
         /// The standard deviation of the distribution. Defaults to 1.0.
         /// </param>
         /// <param name="linkFunction">
-        /// The link function. Defaults to <see cref="IdentityLinkFunction"/>.
+        /// The link function.
         /// </param>
         /// <param name="random">
         /// A random number generator for the distribution. Defaults to <see cref="Random"/>.
         /// </param>
-        public GaussianDistribution(double mean = 0.0, double standardDeviation = 1.0, [CanBeNull] ILinkFunction linkFunction = null, [CanBeNull] Random random = null)
+        public GaussianDistribution([NotNull] ILinkFunction linkFunction, double mean = 0.0, double standardDeviation = 1.0, [CanBeNull] Random random = null)
         {
             Mean = mean;
             StandardDeviation = standardDeviation;
-            LinkFunction = linkFunction ?? new IdentityLinkFunction();
+            LinkFunction = linkFunction;
             _random = random ?? new Random();
         }
 
@@ -161,36 +160,7 @@ namespace AD.Mathematics.Distributions
         [Pure]
         public double LogLikelihood(double[] response, double[] meanResponse, double[] weights, double scale = 1.0)
         {
-            if (LinkFunction is IdentityLinkFunction || LinkFunction is PowerLinkFunction power && power.Power is 1.0)
-            {
-                double[] fitted = Fit(meanResponse);
-
-                double sumSquaredErrors = 0.0;
-
-                for (int i = 0; i < response.Length; i++)
-                {
-                    double error = response[i] - fitted[i];
-
-                    sumSquaredErrors += error * error;
-                }
-
-                double halfObs = 0.5 * response.Length;
-
-                return -halfObs * (Math.Log(sumSquaredErrors) + (1.0 + Math.Log(Math.PI / halfObs)));
-            }
-
-            double result = 0.0;
-
-            double common = Math.Log(Math.PI * 2.0 * scale);
-
-            for (int i = 0; i < response.Length; i++)
-            {
-                double error = response[i] - meanResponse[i];
-
-                result += -0.5 * weights[i] * (error * error / scale + common);
-            }
-
-            return result;
+            return LinkFunction.LogLikelihood(response, meanResponse, weights, scale);
         }
 
         /// <inheritdoc />

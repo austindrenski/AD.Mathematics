@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using AD.Mathematics.LinkFunctions;
 using AD.Mathematics.SpecialFunctions;
 using JetBrains.Annotations;
 
@@ -11,7 +10,7 @@ namespace AD.Mathematics.Distributions
     /// Represents a Poisson statistical distribution. 
     /// </summary>
     [PublicAPI]
-    public class PoissonDistribution : IDistribution<int>
+    public class PoissonDistribution : IDistribution<double>
     {
         /// <summary>
         /// The random number generator used by the distribution.
@@ -104,16 +103,16 @@ namespace AD.Mathematics.Distributions
         /// <summary>
         /// Constructs a <see cref="PoissonDistribution"/>.
         /// </summary>
-        /// <param name="mean">
-        /// A <paramref name="mean"/> value for the distribution. Defaults to 1.0.
-        /// </param>
         /// <param name="linkFunction">
-        /// The link function. Defaults to <see cref="LogLinkFunction"/>.
+        ///     The link function.
+        /// </param>
+        /// <param name="mean">
+        ///     A <paramref name="mean"/> value for the distribution. Defaults to 1.0.
         /// </param>
         /// <param name="random">
-        /// A random number generator for the distribution. Defaults to <see cref="Random"/>.
+        ///     A random number generator for the distribution. Defaults to <see cref="Random"/>.
         /// </param>
-        public PoissonDistribution(double mean = 1.0, [CanBeNull] ILinkFunction linkFunction = default, [CanBeNull] Random random = default)
+        public PoissonDistribution([NotNull] ILinkFunction linkFunction, double mean = 1.0, [CanBeNull] Random random = default)
         {
             if (mean <= 0)
             {
@@ -122,7 +121,7 @@ namespace AD.Mathematics.Distributions
 
             Mean = mean;
             _random = random ?? new Random();
-            LinkFunction = linkFunction ?? new LogLinkFunction();
+            LinkFunction = linkFunction;
 
             _smallSampleEnumerator = SmallSamples();
             _largeSampleEnumerator = LargeSamples();
@@ -354,7 +353,7 @@ namespace AD.Mathematics.Distributions
         /// <returns>
         /// A randomly drawn value from the distribution.
         /// </returns>
-        public int Draw()
+        public double Draw()
         {
             if (Mean < 30.0)
             {
@@ -376,7 +375,7 @@ namespace AD.Mathematics.Distributions
         /// <returns>
         /// An enumerable collection of randomly drawn values from the distribution.
         /// </returns>
-        public IEnumerable<int> Draw(int count)
+        public IEnumerable<double> Draw(int count)
         {
             for (int i = 0; i < count; i++)
             {

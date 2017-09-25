@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using AD.Mathematics.Distributions;
+using AD.Mathematics.LinkFunctions;
 using AD.Mathematics.RegressionModels;
 using AD.Mathematics.Tests;
 
@@ -33,17 +34,17 @@ namespace AD.Mathematics.Console
                 Enumerable.Repeat(1.0, response.Length)
                           .ToArray();
 
-            GeneralizedLinearModel<int> generalized =
-                new GeneralizedLinearModel<int>(input, response, weights, new PoissonDistribution(), true);
+            GeneralizedLinearModel<double> generalized = 
+                GeneralizedLinearModel.PoissonRegression(input, response, weights);
 
             const int count = 10;
             
-            IDistribution<int> distribution = new PoissonDistribution();
+            IDistribution<double> distribution = new PoissonDistribution(new LogLinkFunction());
             Stopwatch sw = new Stopwatch();
             sw.Start();
             for (int i = 0; i < count; i++)
             {
-                generalized = new GeneralizedLinearModel<int>(input, response, weights, distribution, true);
+                generalized = new GeneralizedLinearModel<double>(input, response, weights, distribution, true);
             }
             sw.Stop();
             System.Console.WriteLine(generalized);
@@ -53,7 +54,7 @@ namespace AD.Mathematics.Console
             sw.Restart();
             for (int i = 0; i < count; i++)
             {
-                generalized = new GeneralizedLinearModel<int>(input, response, weights, distribution, true, options);
+                generalized = new GeneralizedLinearModel<double>(input, response, weights, distribution, true, options);
             }
             sw.Stop();
             System.Console.WriteLine(generalized);
