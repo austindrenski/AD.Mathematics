@@ -15,17 +15,16 @@ namespace AD.Mathematics.RegressionModels
     /// Represents a generalized linear regression model.
     /// </summary>
     [PublicAPI]
-    public class GeneralizedLinearModel<T> : IRegressionModel<T>
+    public class GeneralizedLinearModel<T> : IRegressionModel
     {      
         private readonly Lazy<double[]> _standardErrorsOls;
         private readonly Lazy<double[]> _standardErrorsHC0;
         private readonly Lazy<double[]> _standardErrorsHC1;
-        
-        /// <inheritdoc />
+
         /// <summary>
         /// The distribution used to estimate the model.
         /// </summary>
-        public IDistribution<T> Distribution { get; }
+        private readonly IDistribution<T> _distribution;
 
         /// <inheritdoc />
         /// <summary>
@@ -153,7 +152,7 @@ namespace AD.Mathematics.RegressionModels
 
             double[][] designArray = addConstant ? design.Prepend(1.0) : design;
 
-            Distribution  = distribution;
+            _distribution  = distribution;
 
             ObservationCount = designArray.Length;
             

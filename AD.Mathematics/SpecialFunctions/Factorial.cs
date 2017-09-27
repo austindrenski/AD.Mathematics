@@ -49,7 +49,7 @@ namespace AD.Mathematics.SpecialFunctions
 
             if (x < _cacheFactorial.Length)
             {
-                return x == 0 ? default(double) : _cacheFactorial[x];
+                return x == 0 ? default : _cacheFactorial[x];
             }
 
             int start = _cacheFactorial.Length;
@@ -83,7 +83,7 @@ namespace AD.Mathematics.SpecialFunctions
 
             if (x < _cacheLogFactorial.Length)
             {
-                return x == 0 ? default(double) : _cacheLogFactorial[x];
+                return x == 0 ? default : _cacheLogFactorial[x];
             }
 
             int start = _cacheLogFactorial.Length;

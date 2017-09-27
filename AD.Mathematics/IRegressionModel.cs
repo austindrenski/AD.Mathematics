@@ -7,14 +7,8 @@ namespace AD.Mathematics
     /// Represents a regression model.
     /// </summary>
     [PublicAPI]
-    public interface IRegressionModel<out T>
+    public interface IRegressionModel
     {
-        /// <summary>
-        /// The distribution used to estimate the model.
-        /// </summary>
-        [NotNull]
-        IDistribution<T> Distribution { get; }
-        
         /// <summary>
         /// The number of observations used to train the model ≡ N.
         /// </summary>
