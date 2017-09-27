@@ -162,7 +162,7 @@ namespace AD.Mathematics.LinkFunctions
         /// <param name="response">
         /// An array of response values.
         /// </param>
-        /// <param name="meanResponse">
+        /// <param name="fitted">
         /// An array of fitted mean response values.
         /// </param>
         /// <param name="weights">
@@ -175,7 +175,7 @@ namespace AD.Mathematics.LinkFunctions
         /// The value of the log-likelihood function evaluated with the given inputs.
         /// </returns>
         [Pure]
-        public double LogLikelihood(double[] response, double[] meanResponse, double[] weights, double scale = 1.0)
+        public double LogLikelihood(double[] response, double[] fitted, double[] weights, double scale = 1.0)
         {           
             double result = 0.0;
 
@@ -183,7 +183,7 @@ namespace AD.Mathematics.LinkFunctions
 
             for (int i = 0; i < response.Length; i++)
             {
-                double error = response[i] - meanResponse[i];
+                double error = response[i] - fitted[i];
 
                 result += -0.5 * weights[i] * (error * error / scale + common);
             }

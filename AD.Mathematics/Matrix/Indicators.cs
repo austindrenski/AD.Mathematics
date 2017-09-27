@@ -28,49 +28,64 @@ namespace AD.Mathematics.Matrix
             Dictionary<int, Dictionary<double, int>> indicatorLookup =
                 new Dictionary<int, Dictionary<double, int>>();
 
-            Dictionary<int, int> forwardMap = new Dictionary<int, int>();
+            Dictionary<int, int> sourceMap = 
+                new Dictionary<int, int>();
 
             for (int i = 0; i < source[0].Length; i++)
             {
                 if (!indicators.Contains(i))
                 {
-                    forwardMap.Add(i, forwardMap.Count);
+                    sourceMap.Add(i, sourceMap.Count);
                 }
             }
 
-            int columnPointer = source[0].Length - indicators.Length;
+            int columnCounter = source[0].Length - indicators.Length;
 
             for (int i = 0; i < indicators.Length; i++)
             {
                 int loopIndicator = indicators[i];
-                int loopColumnPointer = columnPointer;
+                int loopColumnOffset = columnCounter;
 
                 Dictionary<double, int> indicatorMap =
-                    source.Select((x, j) => x[loopIndicator])
+                    source.Select(x => x[loopIndicator])
                           .Distinct()
-                          .Select((x, j) => (key: j, value: x))
-                          .ToDictionary(x => x.value, x => x.key + loopColumnPointer);
+                          .Select(
+                              (x, j) => new
+                              {
+                                  categoryValue = x,
+                                  column = j + loopColumnOffset
+                              })
+                          .ToDictionary(
+                              x => x.categoryValue,
+                              x => x.column);
 
-                columnPointer += indicatorMap.Count;
+                columnCounter += indicatorMap.Count;
 
-                indicatorLookup.Add(indicators[i], indicatorMap);
+                indicatorLookup.Add(loopIndicator, indicatorMap);
             }
 
+            return ConstructResults(source, sourceMap, indicatorLookup);
+        }
+
+        private static double[][] ConstructResults([NotNull][ItemNotNull] double[][] source, [NotNull] Dictionary<int, int> sourceLookup, [NotNull] Dictionary<int, Dictionary<double, int>> indicatorLookup)
+        {
             double[][] result = new double[source.Length][];
+            
+            int columns = sourceLookup.Count + indicatorLookup.Sum(x => x.Value.Count);
 
             for (int i = 0; i < source.Length; i++)
             {
-                result[i] = new double[columnPointer];
+                result[i] = new double[columns];
                 
                 for (int j = 0; j < source[0].Length; j++)
                 {
-                    if (indicatorLookup.TryGetValue(j, out Dictionary<double, int> appendMap))
+                    if (indicatorLookup.TryGetValue(j, out Dictionary<double, int> indicatorColumnMap))
                     {
-                        result[i][appendMap[source[i][j]]] = 1.0;
+                        result[i][indicatorColumnMap[source[i][j]]] = 1.0;
                     }
                     else
                     {
-                        result[i][forwardMap[j]] = source[i][j];
+                        result[i][sourceLookup[j]] = source[i][j];
                     }
                 }
             }

@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AD.Mathematics.SpecialFunctions;
 using JetBrains.Annotations;
 
 namespace AD.Mathematics.Distributions
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="IDistribution{T}" />
     /// <summary>
     /// Represents a Poisson statistical distribution. 
     /// </summary>
     [PublicAPI]
-    public class PoissonDistribution : IDistribution<double>
+    public class PoissonDistribution : IDistribution<double>, IDistribution<int>
     {
         /// <summary>
         /// The random number generator used by the distribution.
@@ -365,6 +366,11 @@ namespace AD.Mathematics.Distributions
             return _largeSampleEnumerator.Current;
         }
 
+        int IDistribution<int>.Draw()
+        {
+            return (int)Draw();
+        }
+
         /// <inheritdoc />
         /// <summary>
         /// Randomly draws the specified count of values from the distribution.
@@ -381,6 +387,11 @@ namespace AD.Mathematics.Distributions
             {
                 yield return Draw();
             }
+        }
+        
+        IEnumerable<int> IDistribution<int>.Draw(int count)
+        {
+            return Draw(count).Select(x => (int)x);
         }
 
         /// <summary>
