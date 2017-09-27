@@ -187,25 +187,13 @@ namespace AD.Mathematics.Distributions
         /// </returns>
         public double Deviance(double[] response, double[] meanResponse, double[] weights, double scale = 1.0)
         {
-            double[] divided = new double[response.Length];
-
-            for (int i = 0; i < divided.Length; i++)
-            {
-                if (response[i] <= 0)
-                {
-                    divided[i] = double.Epsilon;
-                }
-                else
-                {
-                    divided[i] = response[i] / meanResponse[i];
-                }
-            }
-
             double result = 0.0;
 
-            for (int i = 0; i < divided.Length; i++)
+            for (int i = 0; i < response.Length; i++)
             {
-                result += weights[i] * (response[i] * Math.Log(divided[i]) - response[i] - meanResponse[i]) / scale;
+                double d = response[i] <= 0 ? double.Epsilon : response[i] / meanResponse[i];
+                
+                result += weights[i] * (response[i] * Math.Log(d) - response[i] - meanResponse[i]) / scale;
             }
 
             return 2 * result;
