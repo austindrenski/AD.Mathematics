@@ -1,22 +1,20 @@
 #pragma once
 
+#include <array>
 #include <stdexcept>
-#include <vector>
+#include "FactorialTemplate.h"
 
 namespace SpecialFunctions {
+
     /// <summary>
-    /// Represents a static cache of factorial values that are lazily constructed.
+    /// Represents a static cache of factorial values that are template constructed.
     /// </summary>
     class Factorial {
     public:
         /// <summary>
-        /// Constructs the value cache.
+        /// The recommended limit for factorial calculation.
         /// </summary>
-        Factorial()
-        {
-            _cacheFactorial = {1.0};
-            _cacheLogFactorial = {0.0};
-        }
+        static constexpr int Limit = 170;
 
         /// <summary>
         /// Returns the factorial value for x in [0, 170]
@@ -27,20 +25,13 @@ namespace SpecialFunctions {
         /// <returns>
         /// The factorial of <see cref="x"/>.
         /// </returns>
-        double Get(const unsigned int x)
+        template<typename T>
+        static const double Get(const T x)
         {
-            if (x < 0 || x > 170) {
+            static_assert(std::is_arithmetic<T>::value, "Numeric type required.");
+
+            if (x < 0 || x > Limit) {
                 throw std::out_of_range("Argument range: [0, 170].");
-            }
-
-            if (x < _cacheFactorial.size()) {
-                return x == 0 ? 0.0 : _cacheFactorial[x];
-            }
-
-            const unsigned long start = _cacheFactorial.size();
-
-            for (auto i = start; i < start + x; i++) {
-                _cacheFactorial.push_back(_cacheFactorial[i - 1] * i);
             }
 
             return _cacheFactorial[x];
@@ -55,20 +46,13 @@ namespace SpecialFunctions {
         /// <returns>
         /// The log of the factorial of <see cref="x"/>.
         /// </returns>
-        double GetLog(const unsigned int x)
+        template<typename T>
+        static const double GetLog(const T x)
         {
-            if (x <= 0 || x > 170) {
+            static_assert(std::is_arithmetic<T>::value, "Numeric type required.");
+
+            if (x <= 0 || x > Limit) {
                 throw std::out_of_range("Argument range: (0, 170].");
-            }
-
-            if (x < _cacheLogFactorial.size()) {
-                return x == 0 ? 0.0 : _cacheLogFactorial[x];
-            }
-
-            const unsigned long start = _cacheLogFactorial.size();
-
-            for (unsigned long i = start; i < start + x; i++) {
-                _cacheLogFactorial.push_back(log(Get(x)));
             }
 
             return _cacheLogFactorial[x];
@@ -78,17 +62,11 @@ namespace SpecialFunctions {
         /// <summary>
         /// The cache of factorial values.
         /// </summary>
-        std::vector<double> _cacheFactorial;
+        static const std::array<double, Limit> _cacheFactorial;
 
         /// <summary>
         /// The cache of log factorial values;
         /// </summary>
-        std::vector<double> _cacheLogFactorial;
-
+        static const std::array<double, Limit> _cacheLogFactorial;
     };
-
-    /// <summary>
-    /// Static copy of the factorial class.
-    /// </summary>
-    Factorial StaticFactorial;
 }

@@ -16,7 +16,13 @@ namespace LinkFunctions {
         const std::vector<double> Inverse(const std::vector<double> &x) const override
         {
             std::vector<double> result(x.size());
-            std::transform(x.begin(), x.end(), result.begin(), [](double y) -> double { return 1.0 / y; });
+
+            std::transform(
+                    x.begin(),
+                    x.end(),
+                    result.begin(),
+                    [](double y) -> double { return 1.0 / y; });
+
             return result;
         }
 
@@ -32,12 +38,14 @@ namespace LinkFunctions {
 
         const double LogLikelihood(const std::vector<double> &response, const std::vector<double> &fitted, const std::vector<double> &weights, double scale) const override
         {
+            if (response.size() != fitted.size() || response.size() != weights.size()) {
+                throw std::out_of_range("Argument vectors differ in length.");
+            }
+
             double sumSquaredErrors = 0.0;
 
-            for (int i = 0; i < response.size(); i++) {
-                double error = response[i] - fitted[i];
-
-                sumSquaredErrors += error * error;
+            for (auto r = response.begin(), f = fitted.begin(); r != response.end(); ++r, ++f) {
+                sumSquaredErrors += pow(*r - *f, 2);
             }
 
             double halfObs = 0.5 * response.size();

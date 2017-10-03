@@ -25,7 +25,8 @@ namespace Distributions {
         _link = link == nullptr ? std::make_unique<LinkFunctions::LogLinkFunction>() : std::move(link);
     }
 
-    const double PoissonDistribution::Deviance(const std::vector<double> &response, const std::vector<double> &meanResponse, const std::vector<double> &weights, double scale) const
+    const double
+    PoissonDistribution::Deviance(const std::vector<double> &response, const std::vector<double> &meanResponse, const std::vector<double> &weights, double scale) const
     {
         if (response.size() != meanResponse.size() || response.size() != weights.size()) {
             throw std::out_of_range("Argument vectors differ in length.");
@@ -33,7 +34,7 @@ namespace Distributions {
 
         double result = 0.0;
 
-        for (auto w = weights.begin(), r = response.begin(), m = meanResponse.begin(); w < weights.end(); w++, r++, m++) {
+        for (auto w = weights.begin(), r = response.begin(), m = meanResponse.begin(); w != weights.end(); ++w, ++r, ++m) {
             const double d = log(*r <= 0 ? std::numeric_limits<double>::epsilon() : *r / *m);
 
             result += *w * (*r * d - *r - *m);
@@ -57,9 +58,13 @@ namespace Distributions {
 
         std::vector<double> initialMean(response.size());
 
-        for (auto i = initialMean.begin(), r = static_cast<std::vector<double>>(response).begin(); i < initialMean.end(); i++, r++) {
-            *i = 0.5 * (*r + mean);
-        }
+        std::transform(
+                response.begin(),
+                response.end(),
+                initialMean.begin(),
+                [mean](double x) -> double {
+                    return 0.5 * (x + mean);
+                });
 
         return initialMean;
     }
@@ -70,7 +75,7 @@ namespace Distributions {
             throw std::out_of_range("Argument range: [0, 170].");
         }
 
-        return x * log(_mean) - SpecialFunctions::StaticFactorial.GetLog(static_cast<unsigned int>(x)) - _mean;
+        return x * log(_mean) - SpecialFunctions::Factorial::GetLog(x) - _mean;
     }
 
     const std::vector<double> PoissonDistribution::Predict(const std::vector<double> &meanResponse) const
@@ -91,12 +96,16 @@ namespace Distributions {
     {
         std::vector<double> weight(meanResponse.size());
 
-        std::transform(meanResponse.begin(), meanResponse.end(), weight.begin(), [](double x) -> double { return std::abs(x); });
+        std::transform(
+                meanResponse.begin(),
+                meanResponse.end(),
+                weight.begin(),
+                [](double x) -> double { return std::abs(x); });
 
         std::vector<double> derivative = _link->FirstDerivative(weight);
 
-        for (auto w = weight.begin(), d = derivative.begin(); w < weight.end(); w++, d++) {
-            *w = 1.0 / (*d * *d * *w);
+        for (auto w = weight.begin(), d = derivative.begin(); w != weight.end(); ++w, ++d) {
+            *w = 1.0 / (*w * pow(*d, 2));
         }
 
         return weight;

@@ -92,7 +92,7 @@ namespace AD.Mathematics.SpecialFunctions
 
             for (int i = start; i < _cacheLogFactorial.Length; i++)
             {
-                _cacheLogFactorial[i] = Math.Log(Get(x));
+                _cacheLogFactorial[i] = Math.Log(Get(i));
             }
 
             return _cacheLogFactorial[x];

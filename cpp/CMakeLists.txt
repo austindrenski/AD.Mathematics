@@ -32,7 +32,8 @@ add_library(
         RegressionModels/GeneralizedLinearModel.h
         RegressionModels/GeneralizedLinearModel.cpp
 
-        SpecialFunctions/Factorial.h)
+        SpecialFunctions/Factorial.h
+        SpecialFunctions/Factorial.cpp SpecialFunctions/FactorialTemplate.h)
 
 add_executable(app main.cpp)
 target_link_libraries(app AD_Mathematics)

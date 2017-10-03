@@ -24,12 +24,14 @@ namespace Distributions {
         if (response.size() != meanResponse.size() || response.size() != weights.size()) {
             throw std::out_of_range("Argument vectors differ in length.");
         }
+        if (scale <= 0.0) {
+            throw std::out_of_range("Scale must be greater than zero.");
+        }
 
         double result = 0.0;
 
-        for (auto r = response.begin(), m = meanResponse.begin(); r < response.end(); r++, m++) {
-            const double error = *r - *m;
-            result += *r * error * error;
+        for (auto r = response.begin(), m = meanResponse.begin(); r != response.end(); ++r, ++m) {
+            result += *r * pow(*r - *m, 2);
         }
 
         return result / scale;
@@ -50,9 +52,11 @@ namespace Distributions {
 
         std::vector<double> initialMean(response.size());
 
-        for (auto i = initialMean.begin(), r = static_cast<std::vector<double>>(response).begin(); i < initialMean.end(); i++, r++) {
-            *i = 0.5 * (*r + mean);
-        }
+        std::transform(
+                response.begin(),
+                response.end(),
+                initialMean.begin(),
+                [mean](double x) -> double { return 0.5 * (x + mean); });
 
         return initialMean;
     }
@@ -69,18 +73,20 @@ namespace Distributions {
 
     const double GaussianDistribution::Probability(const double x) const
     {
-        return 1.0 / sqrt(M_PI * 2.0) * exp(-0.5 * x * x);
+        return 1.0 / sqrt(M_PI * 2.0) * exp(-0.5 * pow(x, 2));
     }
 
     const std::vector<double> GaussianDistribution::Weight(const std::vector<double> &meanResponse) const
     {
-        std::vector<double> derivative = _link->FirstDerivative(meanResponse);
-
         std::vector<double> weight(meanResponse.size());
 
-        for (auto w = weight.begin(), d = derivative.begin(); w < weight.end(); w++, d++) {
-            *w = 1.0 / (*d * *d * Variance());
-        }
+        std::vector<double> derivative = _link->FirstDerivative(meanResponse);
+
+        std::transform(
+                derivative.begin(),
+                derivative.end(),
+                weight.begin(),
+                [inverseVariance = 1.0 / Variance()](double x) -> double { return inverseVariance * pow(x, 2); });
 
         return weight;
     }
